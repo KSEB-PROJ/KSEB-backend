@@ -36,16 +36,3 @@ out/
 ### VS Code ###
 .vscode/
 
-# IntelliJ
-/.idea/
-/*.iml
-
-# 빌드 출력
-/build/
-/out/
-/target/
-/.gradle/
-
-# OS
-.DS_Store
-Thumbs.db
