@@ -28,7 +28,7 @@ public class Group {
     @Column(nullable = false, length = 50, unique = true)
     private String code; // 초대 코드/URL
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY) //하나의 그룹(Group)은 하나의 생성자(User)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner; // 그룹 생성자(리더), FK(users.id)
 
@@ -39,5 +39,5 @@ public class Group {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // --- Getters/Setters ---
 }
+
