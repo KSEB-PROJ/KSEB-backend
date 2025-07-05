@@ -11,12 +11,15 @@ public class GroupResponse {
     private String ownerName;
     private String profileImg;
 
-    public GroupResponse(Group group) {
-        this.id = group.getId();
-        this.name = group.getName();
-        this.code = group.getCode();
-        this.ownerName = group.getOwner().getName();
-        this.profileImg = group.getOwner().getProfileImg();
+    public static GroupResponse fromEntity(Group group) {
+        if (group == null) return null;
+        GroupResponse dto = new GroupResponse();
+        dto.id = group.getId();
+        dto.name = group.getName();
+        dto.code = group.getCode();
+        dto.ownerName = group.getOwner().getName();
+        dto.profileImg = group.getOwner().getProfileImg();
+        return dto;
     }
 }
 
