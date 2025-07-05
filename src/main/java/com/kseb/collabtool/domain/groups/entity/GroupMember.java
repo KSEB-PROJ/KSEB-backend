@@ -30,6 +30,5 @@ public class GroupMember {
     @Column(name = "joined_at", nullable = false, updatable = false)
     private LocalDateTime joinedAt = LocalDateTime.now(); // 가입일
 
-    // --- Getters/Setters ---
 }
 
