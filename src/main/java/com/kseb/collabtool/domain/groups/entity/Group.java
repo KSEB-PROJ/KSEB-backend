@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
         @UniqueConstraint(columnNames = "code")
 })
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Group {
 
     @Id
