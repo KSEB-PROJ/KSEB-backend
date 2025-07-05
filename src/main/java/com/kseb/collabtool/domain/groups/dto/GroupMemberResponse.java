@@ -19,14 +19,17 @@ public class GroupMemberResponse {
     private String roleName;
     private LocalDateTime joinedAt;
 
-    public GroupMemberResponse(GroupMember entity) {
-        this.id = entity.getId();
-        this.userId = entity.getUser().getId();
-        this.userName = entity.getUser().getName();
-        this.profileImg = entity.getUser().getProfileImg();
-        this.roleCode = entity.getRole().getCode();
-        this.roleName = entity.getRole().getName();
-        this.joinedAt = entity.getJoinedAt();
+    public static GroupMemberResponse fromEntity(GroupMember entity) {
+        if (entity == null) return null;
+        return new GroupMemberResponse(
+                entity.getId(),
+                entity.getUser().getId(),
+                entity.getUser().getName(),
+                entity.getUser().getProfileImg(),
+                entity.getRole().getCode(),
+                entity.getRole().getName(),
+                entity.getJoinedAt()
+        );
     }
 }
 

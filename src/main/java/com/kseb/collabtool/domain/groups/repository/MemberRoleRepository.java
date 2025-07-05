@@ -3,6 +3,8 @@ package com.kseb.collabtool.domain.groups.repository;
 import com.kseb.collabtool.domain.groups.entity.MemberRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GroupMemberRole extends JpaRepository<MemberRole,Long> {
-    
+import java.util.Optional;
+
+public interface MemberRoleRepository extends JpaRepository<MemberRole,Long> {
+    Optional<MemberRole> findByCode(String code);
 }

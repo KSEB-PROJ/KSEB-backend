@@ -37,5 +37,11 @@ public class Group {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    //그룹 삭제 시 group_members, channels 등 연관 엔티티까지 같이 삭제
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<GroupMember> groupMembers;
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Channel> channels;
 }
 
