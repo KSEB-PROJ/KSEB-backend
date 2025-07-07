@@ -30,6 +30,12 @@ public class GroupMemberService {
     private final MemberRoleRepository memberRoleRepository;
 
     public List<GroupMemberResponse> getMembersByGroupId(Long groupId) {
+        // 그룹(방) 존재 여부 체크
+        boolean exists = groupRepository.existsById(groupId);
+        if (!exists) {
+            throw new GeneralException(Status.GROUP_NOT_FOUND);
+        }
+
         List<GroupMember> members = groupMemberRepository.findByGroup_Id(groupId);
         return members.stream()
                 .map(GroupMemberResponse::fromEntity)
@@ -40,7 +46,7 @@ public class GroupMemberService {
     @Transactional
     public Group joinGroupByInviteCode(String inviteCode, User user) {
         Group group = groupRepository.findByCode(inviteCode) //초대코드검사
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 초대코드입니다."));
+                .orElseThrow(() -> new GeneralException(Status.INVALID_INVITE_CODE));
 
         // 이미 멤버인지 체크
         if (groupMemberRepository.existsByGroupIdAndUserId(group.getId(), user.getId())) {

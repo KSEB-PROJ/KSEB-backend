@@ -64,6 +64,7 @@ public class GroupService {
         return groupMemberRepository.findGroupsByUserId(userId);
     }
 
+    @Transactional
     public GroupDetailDto getGroupDetail(Long groupId) {
         //그룹 정보 조회
         Group group = groupRepository.findById(groupId)
