@@ -28,13 +28,15 @@ public class GroupController {
 
     // 그룹 생성
     @PostMapping("")
-    public ResponseEntity<GroupResponse> createGroup(
+    public ResponseEntity<GroupResponse> createGroup(   //ApiResponse<GroupResponse>
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User owner = currentUser.getUser();
         Group group = groupService.createGroup(request, owner);
-        return ResponseEntity.ok(GroupResponse.fromEntity(group));
+        return ResponseEntity.ok(GroupResponse.fromEntity(group)); //ApiResponse.onSuccess(GroupResponse.fromEntity(group))
+        //성공 응답 포맷으로 묶어서 보낼 수 있는데, 헷갈릴까봐 일단 로그인 회원가입 부분만 따로 포맷 설정해주고 이거는 그냥 보내줬음.
     }
+
     // 그룹 리스트 조회
     @GetMapping("")
     public ResponseEntity<List<GroupListDto>> getMyGroups(
@@ -57,6 +59,6 @@ public class GroupController {
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = currentUser.getUser();
         groupService.deleteGroup(groupId, user);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); //build 사용 했는데, 잘 모르겐
     }
 }
