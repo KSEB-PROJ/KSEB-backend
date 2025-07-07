@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -76,6 +78,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex, response, headers, Status.BAD_REQUEST.getHttpStatus(), request
         );
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAuthenticationException(AuthenticationException ex) {
+        Body body;
+
+        if (ex instanceof BadCredentialsException) {
+            // 아이디/비밀번호 틀림 (로그인 실패)
+            body = Status.LOGIN_FAILED.getBody();
+        } else {
+            // 토큰 없음/만료 등 기타 인증 실패   -> 쓸 일 있을련지 모르겠음
+            body = Status.UNAUTHORIZED.getBody();
+        }
+
+        ApiResponse<Object> response = ApiResponse.onFailure(
+                body.getCode(),
+                body.getMessage(),
+                null
+        );
+        return ResponseEntity.status(body.getHttpStatus()).body(response);
+    }
+
 
     //기타 모든 예외(예상치 못한 서버 에러)
     @ExceptionHandler(Exception.class)

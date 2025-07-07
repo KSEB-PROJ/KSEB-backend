@@ -11,6 +11,8 @@ import com.kseb.collabtool.domain.groups.repository.MemberRoleRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
+import com.kseb.collabtool.global.exception.GeneralException;
+import com.kseb.collabtool.global.exception.Status;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,8 +42,8 @@ public class GroupService {
         group.setCreatedAt(LocalDateTime.now());
         group = groupRepository.save(group);
 
-        MemberRole leaderRole = memberRoleRepository.findByCode("LEADER")
-                .orElseThrow(() -> new RuntimeException("LEADER 역할이 DB에 존재하지 않습니다."));
+        MemberRole leaderRole = memberRoleRepository.findById((short)1) //리더는 1
+                .orElseThrow(() -> new GeneralException(Status.MEMBER_ROLE_NOT_FOUND));
 
         // 생성자를 group_members에 추가
         GroupMember groupMember = new GroupMember();
@@ -65,7 +67,7 @@ public class GroupService {
     public GroupDetailDto getGroupDetail(Long groupId) {
         //그룹 정보 조회
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("그룹을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
 
         //멤버 목록 조회
         List<GroupMember> groupMembers = groupMemberRepository.findByGroup_Id(groupId);
@@ -97,11 +99,11 @@ public class GroupService {
     public void deleteGroup(Long groupId, User currentUser) {
         //그룹 조회
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("그룹을 찾을 수 없습니다."));
+                .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
 
         //권한(오너) 검사
         if (!group.getOwner().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("그룹 삭제 권한이 없습니다.");
+            throw new GeneralException(Status.GROUP_DELETE_FORBIDDEN);
         }
         //삭제
         groupRepository.delete(group);

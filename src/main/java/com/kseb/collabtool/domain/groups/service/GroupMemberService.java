@@ -8,6 +8,8 @@ import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.groups.repository.MemberRoleRepository;
 import com.kseb.collabtool.domain.user.entity.User;
+import com.kseb.collabtool.global.exception.GeneralException;
+import com.kseb.collabtool.global.exception.Status;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -42,11 +44,11 @@ public class GroupMemberService {
 
         // 이미 멤버인지 체크
         if (groupMemberRepository.existsByGroupIdAndUserId(group.getId(), user.getId())) {
-            throw new IllegalStateException("이미 가입된 그룹입니다.");
+            throw new GeneralException(Status.MEMBER_ALREADY_JOINED);
         }
 
-        MemberRole role = memberRoleRepository.findByCode("MEMBER") //역할 코드 검사
-                .orElseThrow(() -> new IllegalStateException("MEMBER 역할이 존재하지 않습니다."));
+        MemberRole role = memberRoleRepository.findById((short)2)
+                .orElseThrow(() -> new GeneralException(Status.MEMBER_ROLE_NOT_FOUND));
 
         GroupMember member = new GroupMember();
         member.setGroup(group);
