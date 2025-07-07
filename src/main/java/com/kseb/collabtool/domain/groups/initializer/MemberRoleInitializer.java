@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class MemberRoleInitializer {
-
+    //예외 커스텀, 트렉잭션 처리,
     private final MemberRoleRepository memberRoleRepository;
 
     @PostConstruct

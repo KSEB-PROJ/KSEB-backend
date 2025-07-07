@@ -1,4 +1,4 @@
-package com.kseb.collabtool.config;
+package com.kseb.collabtool.global.config;
 
 import com.kseb.collabtool.domain.user.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;

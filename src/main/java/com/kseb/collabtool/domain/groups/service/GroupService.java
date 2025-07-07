@@ -53,7 +53,7 @@ public class GroupService {
 
         return group;
     }
-
+    //랜덤 방코드 생성
     private String generateInviteCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
     }
@@ -103,13 +103,6 @@ public class GroupService {
         if (!group.getOwner().getId().equals(currentUser.getId())) {
             throw new RuntimeException("그룹 삭제 권한이 없습니다.");
         }
-        // 그룹 내 LEADER 권한자인지 검사
-        /*boolean isLeader = groupMemberRepository.existsByGroup_IdAndUser_IdAndRole_Code(
-                groupId, currentUser.getId(), "LEADER");
-        if (!isLeader) {
-            throw new GroupAccessDeniedException("그룹 삭제 권한이 없습니다.");
-        }*/
-
         //삭제
         groupRepository.delete(group);
     }
