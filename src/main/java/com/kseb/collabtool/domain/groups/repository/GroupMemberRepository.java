@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember,Long> {
     @Query("SELECT new com.kseb.collabtool.domain.groups.dto.GroupListDto(" +
@@ -22,5 +23,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember,Long> {
 
     List<GroupMember> findByGroup_Id(Long groupId);
 
-    boolean existsByGroup_IdAndUser_IdAndRole_Code(Long groupId, Long userId, String roleCode);
+    boolean existsByGroupIdAndUserId(Long groupId, Long userId);
+
+    Optional<GroupMember> findByGroupIdAndUserId(Long groupId, Long userId);
 }
