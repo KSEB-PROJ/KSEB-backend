@@ -41,10 +41,11 @@ public enum Status {
 
     // ==== 인증/권한 ====
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "auth.invalid_password", "비밀번호가 올바르지 않습니다."),
-
+    // ==== 공지 ====
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다.");
 
     // ==== 기타 (필요시 추가) ====
-    ;
+    
 
     private final HttpStatus httpStatus;
     private final String code;
