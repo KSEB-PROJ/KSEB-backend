@@ -32,9 +32,10 @@ public class GroupController {
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User owner = currentUser.getUser();
-        Group group = groupService.createGroup(request, owner);
-        return ResponseEntity.ok(GroupResponse.fromEntity(group)); //ApiResponse.onSuccess(GroupResponse.fromEntity(group))
-        //성공 응답 포맷으로 묶어서 보낼 수 있는데, 헷갈릴까봐 일단 로그인 회원가입 부분만 따로 포맷 설정해주고 이거는 그냥 보내줬음.
+ feature/exception-handling
+        GroupResponse response = groupService.createGroup(request, owner);
+        return ResponseEntity.ok(response);
+ develop
     }
 
     // 그룹 리스트 조회

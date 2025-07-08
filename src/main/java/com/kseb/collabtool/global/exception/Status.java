@@ -35,6 +35,14 @@ public enum Status {
 
     // ==== 채널 ====
     CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "channel.not_found", "채널을 찾을 수 없습니다."),
+    CHANNEL_TYPE_ALREADY_EXISTS(HttpStatus.CONFLICT, "channel.type_already_exists", "해당 타입의 채널이 이미 존재합니다."),
+    CHANNEL_CREATE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.create_only_leader", "채널 생성은 그룹 리더만 가능합니다."),
+    CHANNEL_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "channel.type_not_found", "채널 타입이 존재하지 않습니다."),
+    CHANNEL_ALREADY_EXISTS(HttpStatus.CONFLICT, "channel.already_exists", "이미 존재하는 채널입니다."),
+    CHANNEL_UPDATE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.update_only_leader", "채널 수정은 그룹 리더만 가능합니다."),
+    CHANNEL_DELETE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.delete_only_leader", "채널 삭제는 그룹 리더만 가능합니다."),
+    CHANNEL_SYSTEM_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "channel.system_delete_forbidden", "시스템 채널(공지/캘린더)은 삭제할 수 없습니다."),
+
 
     // ==== 파일 ====
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "file.not_found", "파일이 존재하지 않습니다."),
