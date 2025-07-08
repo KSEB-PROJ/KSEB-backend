@@ -18,7 +18,7 @@ public class ChannelType {
     private Short id; // TINYINT와 매핑, PK
 
     @Column(nullable = false, unique = true, length = 32)
-    private String code; // CHAT / CALENDAR / NOTICE 등
+    private String code; // CHAT / CALENDAR / NOTICE 등 1 2 3
 
     @Column(nullable = false, length = 64)
     private String name; // 표시명(채팅 / 캘린더)

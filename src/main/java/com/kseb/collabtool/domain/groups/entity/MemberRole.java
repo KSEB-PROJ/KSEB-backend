@@ -13,7 +13,7 @@ public class MemberRole {
     private Short id; // TINYINT PK
 
     @Column(nullable = false, unique = true, length = 32)
-    private String code; // LEADER, MEMBER 등
+    private String code; // LEADER, MEMBER 등   LEADER랑 MEMBER를 넣어둬야함.
 
     @Column(nullable = false, length = 64)
     private String name; // 표시명 (리더, 멤버)
