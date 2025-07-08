@@ -32,8 +32,8 @@ public class GroupController {
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User owner = currentUser.getUser();
-        Group group = groupService.createGroup(request, owner);
-        return ResponseEntity.ok(GroupResponse.fromEntity(group));
+        GroupResponse response = groupService.createGroup(request, owner);
+        return ResponseEntity.ok(response);
     }
     // 그룹 리스트 조회
     @GetMapping("")

@@ -31,8 +31,8 @@ public class GroupMemberController {
             @RequestBody GroupJoinByCodeRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = currentUser.getUser();
-        Group group = groupMemberService.joinGroupByInviteCode(request.getInviteCode(), user);
-        return ResponseEntity.ok(GroupResponse.fromEntity(group));
+        GroupResponse response = groupMemberService.joinGroupByInviteCode(request.getInviteCode(), user);
+        return ResponseEntity.ok(response);
     }
 
 
