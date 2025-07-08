@@ -3,6 +3,7 @@ package com.kseb.collabtool.domain.groups.service;
 import com.kseb.collabtool.domain.groups.dto.GroupCreateRequest;
 import com.kseb.collabtool.domain.groups.dto.GroupDetailDto;
 import com.kseb.collabtool.domain.groups.dto.GroupListDto;
+import com.kseb.collabtool.domain.groups.dto.GroupResponse;
 import com.kseb.collabtool.domain.groups.entity.Group;
 import com.kseb.collabtool.domain.groups.entity.GroupMember;
 import com.kseb.collabtool.domain.groups.entity.MemberRole;
@@ -32,7 +33,7 @@ public class GroupService {
     private final MemberRoleRepository memberRoleRepository;
 
     @Transactional
-    public Group createGroup(GroupCreateRequest groupCreateRequest, User owner) {
+    public GroupResponse createGroup(GroupCreateRequest groupCreateRequest, User owner) {
         Group group = new Group();
         group.setName(groupCreateRequest.getName());
         group.setCode(generateInviteCode());
@@ -43,7 +44,6 @@ public class GroupService {
         MemberRole leaderRole = memberRoleRepository.findByCode("LEADER")
                 .orElseThrow(() -> new RuntimeException("LEADER 역할이 DB에 존재하지 않습니다."));
 
-        // 생성자를 group_members에 추가
         GroupMember groupMember = new GroupMember();
         groupMember.setGroup(group);
         groupMember.setUser(owner);
@@ -51,7 +51,8 @@ public class GroupService {
         groupMember.setJoinedAt(LocalDateTime.now());
         groupMemberRepository.save(groupMember);
 
-        return group;
+        //엔티티를 DTO 반환
+        return GroupResponse.fromEntity(group);
     }
     //랜덤 방코드 생성
     private String generateInviteCode() {

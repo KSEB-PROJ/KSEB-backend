@@ -1,11 +1,17 @@
 package com.kseb.collabtool.domain.channel.dto;
 
 import com.kseb.collabtool.domain.channel.entity.Channel;
+import com.kseb.collabtool.domain.groups.dto.GroupResponse;
+import com.kseb.collabtool.domain.groups.entity.Group;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Data
+@Getter
+@AllArgsConstructor
 public class ChannelResponse {
     private Long id;
     private String name;
@@ -15,13 +21,15 @@ public class ChannelResponse {
     private boolean isSystem;
     private LocalDateTime createdAt;
 
-    public ChannelResponse(Channel channel) {
-        this.id = channel.getId();
-        this.name = channel.getName();
-        this.channelTypeId = channel.getChannelType().getId();
-        this.channelTypeCode = channel.getChannelType().getCode();
-        this.channelTypeName = channel.getChannelType().getName();
-        this.isSystem = channel.getIsSystem();
-        this.createdAt=channel.getCreatedAt();
+    public static ChannelResponse fromEntity(Channel channel) {
+        return new ChannelResponse(
+                channel.getId(),
+                channel.getName(),
+                channel.getChannelType().getId(),
+                channel.getChannelType().getCode(),
+                channel.getChannelType().getName(),
+                channel.getIsSystem(),
+                channel.getCreatedAt()
+        );
     }
 }

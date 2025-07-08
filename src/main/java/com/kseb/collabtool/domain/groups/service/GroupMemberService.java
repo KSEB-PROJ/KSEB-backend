@@ -1,6 +1,7 @@
 package com.kseb.collabtool.domain.groups.service;
 
 import com.kseb.collabtool.domain.groups.dto.GroupMemberResponse;
+import com.kseb.collabtool.domain.groups.dto.GroupResponse;
 import com.kseb.collabtool.domain.groups.entity.Group;
 import com.kseb.collabtool.domain.groups.entity.GroupMember;
 import com.kseb.collabtool.domain.groups.entity.MemberRole;
@@ -36,7 +37,7 @@ public class GroupMemberService {
 
     //그룹 참가
     @Transactional
-    public Group joinGroupByInviteCode(String inviteCode, User user) {
+    public GroupResponse joinGroupByInviteCode(String inviteCode, User user) {
         Group group = groupRepository.findByCode(inviteCode) //초대코드검사
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 초대코드입니다."));
 
@@ -55,7 +56,7 @@ public class GroupMemberService {
         member.setJoinedAt(LocalDateTime.now());
         groupMemberRepository.save(member);
 
-        return group;
+        return GroupResponse.fromEntity(group);
     }
 
 
