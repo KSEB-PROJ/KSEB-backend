@@ -28,13 +28,16 @@ public class GroupController {
 
     // 그룹 생성
     @PostMapping("")
-    public ResponseEntity<GroupResponse> createGroup(
+    public ResponseEntity<GroupResponse> createGroup(   //ApiResponse<GroupResponse>
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User owner = currentUser.getUser();
+ feature/exception-handling
         GroupResponse response = groupService.createGroup(request, owner);
         return ResponseEntity.ok(response);
+ develop
     }
+
     // 그룹 리스트 조회
     @GetMapping("")
     public ResponseEntity<List<GroupListDto>> getMyGroups(
@@ -57,6 +60,6 @@ public class GroupController {
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = currentUser.getUser();
         groupService.deleteGroup(groupId, user);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); //build 사용 했는데, 잘 모르겐
     }
 }
