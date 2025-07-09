@@ -1,5 +1,6 @@
 package com.kseb.collabtool.domain.schedule.entity;
 
+import com.kseb.collabtool.domain.events.entity.TaskStatus;
 import com.kseb.collabtool.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
