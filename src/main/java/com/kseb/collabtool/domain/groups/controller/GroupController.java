@@ -32,10 +32,8 @@ public class GroupController {
             @RequestBody GroupCreateRequest request,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         User owner = currentUser.getUser();
- feature/exception-handling
         GroupResponse response = groupService.createGroup(request, owner);
         return ResponseEntity.ok(response);
- develop
     }
 
     // 그룹 리스트 조회
