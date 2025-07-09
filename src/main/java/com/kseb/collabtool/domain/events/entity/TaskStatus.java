@@ -1,4 +1,4 @@
-package com.kseb.collabtool.domain.schedule.entity;
+package com.kseb.collabtool.domain.events.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
