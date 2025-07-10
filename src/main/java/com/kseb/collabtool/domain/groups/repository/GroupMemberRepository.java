@@ -19,11 +19,14 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember,Long> {
             "GROUP BY g.id, g.name, g.code, nc.id " +
             "ORDER BY g.id DESC")
 
-    List<GroupListDto> findGroupsByUserId(@Param("userId") Long userId);
+    List<GroupListDto> findGroupsByUserId(@Param("userId") Long userId); //내가 속한 그룹들
 
     List<GroupMember> findByGroup_Id(Long groupId);
 
     boolean existsByGroupIdAndUserId(Long groupId, Long userId);
 
     Optional<GroupMember> findByGroupIdAndUserId(Long groupId, Long userId);
+
+    @Query("SELECT gm.user.id FROM GroupMember gm WHERE gm.group.id = :groupId")
+    List<Long> findUserIdsByGroupId(@Param("groupId") Long groupId); //특정 그룹에 속한 모든 멤버의 id 리스트
 }
