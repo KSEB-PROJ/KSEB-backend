@@ -30,13 +30,18 @@ public class NoticeService {
                 .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
         Channel channel = channelRepository.findById(req.getChannelId())
                 .orElseThrow(() -> new GeneralException(Status.CHANNEL_NOT_FOUND));
+        if (req.getPinnedUntil() != null && req.getPinnedUntil().isBefore(LocalDateTime.now())) {
+            throw new GeneralException(Status.INVALID_PINNED_UNTIL); // 추가 필요!
+        }
 
         Notice notice = new Notice();
         notice.setGroup(group);
         notice.setChannel(channel);
         notice.setUser(user);
         notice.setContent(req.getContent());
+        notice.setPinnedUntil(req.getPinnedUntil()); // <<<<<<<<<<<<<<<<<<<<<<<< 이 줄이 중요
         notice.setCreatedAt(LocalDateTime.now());
+
         noticeRepository.save(notice);
         return toResponse(notice);
     }
@@ -56,8 +61,17 @@ public class NoticeService {
     public NoticeResponse updateNotice(Long noticeId, NoticeUpdateRequest req) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new GeneralException(Status.NOTICE_NOT_FOUND));
+
         notice.setContent(req.getContent());
         notice.setUpdatedAt(LocalDateTime.now());
+
+        // pinnedUntil 값이 있으면 예외 처리 후 업데이트
+        if (req.getPinnedUntil() != null) {
+            if (req.getPinnedUntil().isBefore(LocalDateTime.now())) {
+                throw new GeneralException(Status.INVALID_PINNED_UNTIL);
+            }
+            notice.setPinnedUntil(req.getPinnedUntil());
+        }
         return toResponse(notice);
     }
 
@@ -66,10 +80,13 @@ public class NoticeService {
         noticeRepository.deleteById(noticeId);
     }
 
-    @Transactional
     public NoticeResponse pinNotice(Long noticeId, NoticePinRequest req) {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new GeneralException(Status.NOTICE_NOT_FOUND));
+        // 2. 만료 시간이 이미 지났으면 예외
+        if (req.getPinnedUntil() != null && req.getPinnedUntil().isBefore(LocalDateTime.now())) {
+            throw new GeneralException(Status.INVALID_PINNED_UNTIL); // 추가 필요!
+        }
         notice.setPinnedUntil(req.getPinnedUntil());
         return toResponse(notice);
     }
@@ -87,4 +104,5 @@ public class NoticeService {
                 .updatedAt(notice.getUpdatedAt())
                 .build();
     }
+
 }

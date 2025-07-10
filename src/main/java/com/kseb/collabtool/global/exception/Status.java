@@ -42,7 +42,11 @@ public enum Status {
     // ==== 인증/권한 ====
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "auth.invalid_password", "비밀번호가 올바르지 않습니다."),
     // ==== 공지 ====
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다.");
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다."),
+    INVALID_PINNED_UNTIL(HttpStatus.BAD_REQUEST, "notice.invalid_pinned_until", "만료시간이 현재보다 이전일 수 없습니다."),
+    // ==== 스케쥴 ====
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "schedule.not_found", "일정이 존재하지 않습니다.");
+
 
     // ==== 기타 (필요시 추가) ====
     
