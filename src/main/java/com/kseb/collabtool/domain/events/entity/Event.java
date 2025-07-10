@@ -65,14 +65,16 @@ public class Event {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // 양방향 연관관계 => 있으면 관리하기 편하다
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventTask> tasks = new ArrayList<>();
+    @Column(name = "group_event_id")
+    private Long groupEventId;
 
-    // 연관관계 편의 메서드
-    public void addTask(EventTask task) {
-        tasks.add(task);
-        task.setEvent(this);
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventParticipant> participants = new ArrayList<>();
+
+    // 연관관계 메서드
+    public void addParticipant(EventParticipant participant) {
+        participants.add(participant);
+        participant.setEvent(this);
     }
 
 }

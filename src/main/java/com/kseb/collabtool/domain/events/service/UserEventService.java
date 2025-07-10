@@ -1,6 +1,7 @@
 package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
+import com.kseb.collabtool.domain.events.dto.EventResponseDto;
 import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.entity.*;
 import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
@@ -15,10 +16,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class EventService {
+public class UserEventService {
 
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository userRepository;
@@ -27,11 +30,9 @@ public class EventService {
 
     @Transactional
     public EventCreateResult createUserEvent(UserEventCreateRequest dto, Long userId) {
-        //겹침 체크 (hasOverlap)
-        boolean hasOverlap = eventRepository.existsOverlap(
+        boolean hasOverlap = eventRepository.existsOverlap( //겹치는 스케쥴 확인
                 userId, dto.getStartDatetime(), dto.getEndDatetime());
 
-        //Entity 변환 및 연관관계 처리
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
         Event event = new Event();
@@ -49,30 +50,36 @@ public class EventService {
         event.setCreatedAt(LocalDateTime.now());
         event.setUpdatedAt(LocalDateTime.now());
 
-        // 참여자 연관관계 (본인 자동 추가)
+        eventRepository.save(event);
+
+        // 참여자로 추가 (있어야되나???)
         EventParticipant self = new EventParticipant();
         self.setEvent(event);
         self.setUser(user);
         self.setStatus(ParticipantStatus.ACCEPTED);
-        //event.getParticipants().add(self);
+        self.setId(new EventParticipantId(event.getId(), user.getId()));
+        event.getParticipants().add(self);
 
-        // 추가 참여자 처리
-        if (dto.getParticipantIds() != null) {
-            for (Long pid : dto.getParticipantIds()) {
-                if(pid.equals(user.getId())) continue; // 중복 방지
-                User participant = userRepository.findById(pid)
-                        .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
-                EventParticipant ep = new EventParticipant();
-                ep.setEvent(event);
-                ep.setUser(participant);
-                ep.setStatus(ParticipantStatus.ACCEPTED);
-                //event.getParticipants().add(ep);
-            }
-        }
-        eventRepository.save(event);
-
-        // 결과 리턴 (겹침 여부 함께)
         return new EventCreateResult(event.getId(), hasOverlap);
+    }
+    @Transactional
+    public void deleteUserEvent(Long eventId, Long userId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new GeneralException(Status.EVENT_NOT_FOUND));
+        // 본인 소유 이벤트만 삭제 가능하게
+        if (event.getOwnerType() != OwnerType.USER || !event.getOwnerId().equals(userId)) {
+            throw new GeneralException(Status.NO_AUTHORITY); // 권한 없음 등
+        }
+
+        eventRepository.delete(event);
+    }
+
+    @Transactional
+    public List<EventResponseDto> getUserEvents(Long userId) {
+        List<Event> events = eventRepository.findByOwnerTypeAndOwnerId(OwnerType.USER, userId);
+        return events.stream()
+                .map(EventResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
 

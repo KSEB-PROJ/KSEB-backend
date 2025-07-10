@@ -14,5 +14,4 @@ public class UserEventCreateRequest {
     private LocalDateTime endDatetime;
     private boolean allDay;
     private String rrule;
-    private List<Long> participantIds;
 }
