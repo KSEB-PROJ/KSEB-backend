@@ -14,6 +14,7 @@ public class TaskStatus {
 
     @Column(nullable = false, unique = true, length = 32)
     private String code; // TODO, DOING, DONE 등
+    //1번 todo 2번 doing 3번 done
 
     @Column(nullable = false, length = 64)
     private String name; // UI 표시명 (할 일, 진행, 완료 등)

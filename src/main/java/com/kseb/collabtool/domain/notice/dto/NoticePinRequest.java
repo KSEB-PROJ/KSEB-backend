@@ -8,5 +8,5 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class NoticePinRequest {
-    private LocalDateTime pinnedUntil; // 고정 해제일시 (null이면 고정 해제)
+    private LocalDateTime pinnedUntil; // 고정 해제일시 (null 이면 고정 해제)
 }

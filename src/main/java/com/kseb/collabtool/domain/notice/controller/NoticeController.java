@@ -20,8 +20,7 @@ public class NoticeController {
             @PathVariable Long groupId,
             @RequestBody NoticeCreateRequest req,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        User user = currentUser.getUser();
-        return noticeService.createNotice(groupId, req, user);
+        return noticeService.createNotice(groupId, req, currentUser.getUser());
     }
 
     // 공지 목록 조회
@@ -55,12 +54,6 @@ public class NoticeController {
         noticeService.deleteNotice(noticeId);
     }
 
-    // 공지 상단고정/해제
-    @PatchMapping("/groups/{groupId}/notices/{noticeId}/pin")
-    public NoticeResponse pinNotice(
-            @PathVariable Long groupId,
-            @PathVariable Long noticeId,
-            @RequestBody NoticePinRequest req) {
-        return noticeService.pinNotice(noticeId, req);
-    }
+
+
 }
