@@ -43,6 +43,9 @@ public enum Status {
     CHANNEL_DELETE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.delete_only_leader", "채널 삭제는 그룹 리더만 가능합니다."),
     CHANNEL_SYSTEM_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "channel.system_delete_forbidden", "시스템 채널(공지/캘린더)은 삭제할 수 없습니다."),
 
+    // ==== 이벤트 ====
+    EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "event.not_found", "이벤트를 찾을 수 없습니다."),
+    NO_AUTHORITY(HttpStatus.FORBIDDEN, "event.no_authority", "이벤트에 대한 권한이 없습니다."),
 
     // ==== 파일 ====
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "file.not_found", "파일이 존재하지 않습니다."),

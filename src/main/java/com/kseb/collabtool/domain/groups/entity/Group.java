@@ -1,6 +1,7 @@
 package com.kseb.collabtool.domain.groups.entity;
 
 import com.kseb.collabtool.domain.channel.entity.Channel;
+import com.kseb.collabtool.domain.events.entity.Event;
 import com.kseb.collabtool.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "study_groups", uniqueConstraints = {
@@ -37,11 +39,12 @@ public class Group {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    //그룹 삭제 시 group_members, channels 등 연관 엔티티까지 같이 삭제
+    //그룹 삭제 시 group_members, channels, events 등 연관 엔티티까지 같이 삭제
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<GroupMember> groupMembers;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<Channel> channels;
+
 }
 

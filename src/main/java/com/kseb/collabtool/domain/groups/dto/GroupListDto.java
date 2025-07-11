@@ -12,5 +12,4 @@ public class GroupListDto {
     private String name;
     private String code;
     private Long noticeChannelId;
-    private Long memberCount; //JPQL에서 COUNT(m)로 계산
 }
