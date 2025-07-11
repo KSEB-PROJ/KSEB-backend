@@ -4,6 +4,7 @@ import com.kseb.collabtool.domain.events.dto.EventCreateResult;
 import com.kseb.collabtool.domain.events.dto.EventResponseDto;
 import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
 import com.kseb.collabtool.domain.events.entity.*;
+import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
 import com.kseb.collabtool.domain.events.repository.EventRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -25,6 +26,8 @@ public class GroupEventService {
     private final EventRepository eventRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository userRepository;
+    private final EventParticipantRepository eventParticipantRepository;
+
 
     @Transactional
     public EventCreateResult createGroupEvent(Long groupId, GroupEventCreateRequest dto, Long creatorId) {
@@ -99,5 +102,28 @@ public class GroupEventService {
         return events.stream()
                 .map(EventResponseDto::from)
                 .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    public void updateParticipantStatus(Long groupId, Long eventId, Long userId, ParticipantStatus newStatus) {
+        //이벤트와 그룹 소유권 체크
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new GeneralException(Status.EVENT_NOT_FOUND));
+        if (event.getOwnerType() != OwnerType.GROUP || !event.getOwnerId().equals(groupId)) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+
+        //그룹 멤버인지 체크
+        boolean isMember = groupMemberRepository.existsByGroupIdAndUserId(groupId, userId);
+        if (!isMember) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+
+        //본인 참가 상태 변경
+        EventParticipantId pk = new EventParticipantId(eventId, userId);
+        EventParticipant participant = eventParticipantRepository.findById(pk)
+                .orElseThrow(() -> new GeneralException(Status.NOT_FOUND, "참여 기록이 없습니다."));
+        participant.setStatus(newStatus);
     }
 }
