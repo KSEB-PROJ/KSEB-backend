@@ -18,7 +18,7 @@ public class GroupDetailDto {
 
     @Data
     @AllArgsConstructor
-    public static class MemberInfo {
+    public static class MemberInfo { //그룹에 속한 유저 정보들
         private Long userId;
         private String userName;
         private String role;

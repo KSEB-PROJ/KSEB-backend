@@ -1,5 +1,7 @@
 package com.kseb.collabtool.domain.groups.service;
 
+import com.kseb.collabtool.domain.events.entity.OwnerType;
+import com.kseb.collabtool.domain.events.repository.EventRepository;
 import com.kseb.collabtool.domain.groups.dto.GroupCreateRequest;
 import com.kseb.collabtool.domain.groups.dto.GroupDetailDto;
 import com.kseb.collabtool.domain.groups.dto.GroupListDto;
@@ -33,6 +35,8 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
 
     private final MemberRoleRepository memberRoleRepository;
+
+    private final EventRepository eventRepository;
 
     @Transactional
     public GroupResponse createGroup(GroupCreateRequest groupCreateRequest, User owner) {
@@ -98,7 +102,7 @@ public class GroupService {
     }
 
     @Transactional
-    public void deleteGroup(Long groupId, User currentUser) {
+    public void deleteGroupAndAllData(Long groupId, User currentUser) {
         //그룹 조회
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
@@ -107,6 +111,11 @@ public class GroupService {
         if (!group.getOwner().getId().equals(currentUser.getId())) {
             throw new GeneralException(Status.GROUP_DELETE_FORBIDDEN);
         }
+
+
+        //이벤트 등 외부 연관 데이터 직접 삭제 (ownerType/ownerId 조합)
+        eventRepository.deleteByOwnerTypeAndOwnerId(OwnerType.GROUP, groupId);
+
         //삭제
         groupRepository.delete(group);
     }
