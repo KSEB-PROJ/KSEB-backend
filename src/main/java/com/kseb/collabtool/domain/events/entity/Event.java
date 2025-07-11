@@ -4,6 +4,8 @@ import com.kseb.collabtool.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -65,10 +67,8 @@ public class Event {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Column(name = "group_event_id")
-    private Long groupEventId;
-
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<EventParticipant> participants = new ArrayList<>();
 
     // 연관관계 메서드
