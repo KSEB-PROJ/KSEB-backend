@@ -75,8 +75,8 @@ public class UserEventService {
     }
 
     @Transactional
-    public List<EventResponseDto> getUserEvents(Long userId) {
-        List<Event> events = eventRepository.findByOwnerTypeAndOwnerId(OwnerType.USER, userId);
+    public List<EventResponseDto> getAllEventsForUser(Long userId) {
+        List<Event> events = eventRepository.findAllEventsForUser(userId);
         return events.stream()
                 .map(EventResponseDto::from)
                 .collect(Collectors.toList());

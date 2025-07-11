@@ -51,7 +51,7 @@ public class UserEventController {
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
-        List<EventResponseDto> events = eventService.getUserEvents(user.getId());
+        List<EventResponseDto> events = eventService.getAllEventsForUser(user.getId());
         return ResponseEntity.ok(events);
     }
 
