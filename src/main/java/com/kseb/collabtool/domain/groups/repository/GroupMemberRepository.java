@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember,Long> {
     @Query("SELECT new com.kseb.collabtool.domain.groups.dto.GroupListDto(" +
-            "g.id, g.name, g.code, nc.id, COUNT(m)) " +
+            "g.id, g.name, g.code, nc.id) " +
             "FROM GroupMember m " +
             "JOIN m.group g " +
             "LEFT JOIN g.noticeChannel nc " +
