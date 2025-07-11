@@ -4,6 +4,7 @@ import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import com.kseb.collabtool.global.exception.GeneralException;
 import com.kseb.collabtool.global.exception.Status;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public User register(String email, String password, String name) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new GeneralException(Status.USER_EMAIL_ALREADY_EXISTS);
