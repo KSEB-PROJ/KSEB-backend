@@ -19,6 +19,9 @@ public enum Status {
     NOT_FOUND(HttpStatus.NOT_FOUND, "common.not_found", "리소스를 찾을 수 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "common.server_error", "서버 오류가 발생했습니다."),
 
+    // ===로그인 부분===
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "auth.login_failed", "로그인 실패: 아이디 또는 비밀번호가 틀렸습니다."),
+
     // ==== 유저/멤버 ====
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "user.not_found", "사용자를 찾을 수 없습니다."),
     USER_EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "user.email_already_exists", "이미 등록된 이메일입니다."),
@@ -28,6 +31,7 @@ public enum Status {
     // ==== 그룹 ====
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "group.not_found", "그룹을 찾을 수 없습니다."),
     INVALID_INVITE_CODE(HttpStatus.BAD_REQUEST, "group.invalid_invite_code", "유효하지 않은 초대코드입니다."),
+    GROUP_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "group.delete_forbidden", "그룹 삭제 권한이 없습니다."),
 
     // ==== 채널 ====
     CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "channel.not_found", "채널을 찾을 수 없습니다."),
@@ -35,6 +39,10 @@ public enum Status {
     CHANNEL_CREATE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.create_only_leader", "채널 생성은 그룹 리더만 가능합니다."),
     CHANNEL_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, "channel.type_not_found", "채널 타입이 존재하지 않습니다."),
     CHANNEL_ALREADY_EXISTS(HttpStatus.CONFLICT, "channel.already_exists", "이미 존재하는 채널입니다."),
+    CHANNEL_UPDATE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.update_only_leader", "채널 수정은 그룹 리더만 가능합니다."),
+    CHANNEL_DELETE_ONLY_LEADER(HttpStatus.FORBIDDEN, "channel.delete_only_leader", "채널 삭제는 그룹 리더만 가능합니다."),
+    CHANNEL_SYSTEM_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "channel.system_delete_forbidden", "시스템 채널(공지/캘린더)은 삭제할 수 없습니다."),
+
 
     // ==== 파일 ====
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "file.not_found", "파일이 존재하지 않습니다."),
