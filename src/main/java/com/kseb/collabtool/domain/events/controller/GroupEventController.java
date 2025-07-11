@@ -3,9 +3,11 @@ package com.kseb.collabtool.domain.events.controller;
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
 import com.kseb.collabtool.domain.events.dto.EventResponseDto;
 import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
+import com.kseb.collabtool.domain.events.dto.ParticipantStatusUpdateRequest;
 import com.kseb.collabtool.domain.events.service.GroupEventService;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,6 +55,21 @@ public class GroupEventController {
         List<EventResponseDto> events = groupEventService.getGroupEvents(groupId);
         return ResponseEntity.ok(events);
     }
+
+    //status
+    @PutMapping("/{eventId}/participants/me/status")
+    public ResponseEntity<Void> updateMyStatus(
+            @PathVariable Long groupId,
+            @PathVariable Long eventId,
+            @RequestBody @Valid ParticipantStatusUpdateRequest dto,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        Long userId = currentUser.getUser().getId(); // 현재 로그인한 사용자 ID
+        groupEventService.updateParticipantStatus(groupId, eventId, userId, dto.getStatus());
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 
 }
