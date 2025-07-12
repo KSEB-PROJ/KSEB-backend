@@ -2,6 +2,7 @@ package com.kseb.collabtool.domain.events.controller;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
 import com.kseb.collabtool.domain.events.dto.EventResponse;
+import com.kseb.collabtool.domain.events.dto.EventUpdateRequest;
 import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.service.UserEventService;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -18,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserEventController {
 
-    private final UserEventService eventService;
+    private final UserEventService userEventService;
 
     @PostMapping
     public ResponseEntity<EventCreateResult> createUserEvent(
@@ -26,7 +27,7 @@ public class UserEventController {
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
-        EventCreateResult result = eventService.createUserEvent(dto, user.getId());
+        EventCreateResult result = userEventService.createUserEvent(dto, user.getId());
         return ResponseEntity.ok(result);
     }
 
@@ -40,7 +41,7 @@ public class UserEventController {
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
-        eventService.deleteUserEvent(eventId, user.getId());
+        userEventService.deleteUserEvent(eventId, user.getId());
         //롤백 성공 메세지 넣을까말까 했는데, 그냥 삭제할 때도 사용할거라 프론트쪽에서 처리해주면 좋을듯
         return ResponseEntity.noContent().build();
     }
@@ -51,8 +52,19 @@ public class UserEventController {
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
-        List<EventResponse> events = eventService.getAllEventsForUser(user.getId());
+        List<EventResponse> events = userEventService.getAllEventsForUser(user.getId());
         return ResponseEntity.ok(events);
+    }
+
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<Void> patchUserEvent(
+            @PathVariable Long eventId,
+            @RequestBody EventUpdateRequest dto,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        Long userId = currentUser.getUser().getId();
+        userEventService.updateUserEvent(eventId, userId, dto);
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -2,6 +2,7 @@ package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
 import com.kseb.collabtool.domain.events.dto.EventResponse;
+import com.kseb.collabtool.domain.events.dto.EventUpdateRequest;
 import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.entity.*;
 import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
@@ -62,6 +63,7 @@ public class UserEventService {
 
         return new EventCreateResult(event.getId(), hasOverlap);
     }
+
     @Transactional
     public void deleteUserEvent(Long eventId, Long userId) {
         Event event = eventRepository.findById(eventId)
@@ -80,6 +82,31 @@ public class UserEventService {
         return events.stream()
                 .map(EventResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateUserEvent(Long eventId, Long userId, EventUpdateRequest dto) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new GeneralException(Status.EVENT_NOT_FOUND));
+        //권한 체크
+        if (!(event.getOwnerType() == OwnerType.USER && event.getOwnerId().equals(userId))) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+
+        // 프론트에서 바꾸고 싶은 값만 넘겨줌
+        if (dto.getTitle() != null) event.setTitle(dto.getTitle());
+        if (dto.getDescription() != null) event.setDescription(dto.getDescription());
+        if (dto.getLocation() != null) event.setLocation(dto.getLocation());
+        if (dto.getStartDatetime() != null) event.setStartDatetime(dto.getStartDatetime());
+        if (dto.getEndDatetime() != null) event.setEndDatetime(dto.getEndDatetime());
+        if (dto.getAllDay() != null) event.setAllDay(dto.getAllDay());
+        if (dto.getRrule() != null) event.setRrule(dto.getRrule());
+
+        // 변경자 변경일시 갱신
+        User updater = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
+        event.setUpdatedBy(updater);
+        event.setUpdatedAt(LocalDateTime.now());
     }
 }
 
