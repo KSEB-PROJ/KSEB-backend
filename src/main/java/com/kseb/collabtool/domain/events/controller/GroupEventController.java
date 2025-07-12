@@ -1,9 +1,6 @@
 package com.kseb.collabtool.domain.events.controller;
 
-import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponse;
-import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
-import com.kseb.collabtool.domain.events.dto.ParticipantStatusUpdateRequest;
+import com.kseb.collabtool.domain.events.dto.*;
 import com.kseb.collabtool.domain.events.service.GroupEventService;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.security.CustomUserDetails;
@@ -69,6 +66,17 @@ public class GroupEventController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{eventId}")
+    public ResponseEntity<Void> patchGroupEvent(
+            @PathVariable Long groupId,
+            @PathVariable Long eventId,
+            @RequestBody EventUpdateRequest dto,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        Long userId = currentUser.getUser().getId();
+        groupEventService.updateGroupEvent(groupId, eventId, userId, dto);
+        return ResponseEntity.noContent().build();
+    }
 
 
 
