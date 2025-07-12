@@ -2,6 +2,7 @@ package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventTaskCreateRequest;
 import com.kseb.collabtool.domain.events.dto.EventTaskResponse;
+import com.kseb.collabtool.domain.events.dto.MyTaskResponse;
 import com.kseb.collabtool.domain.events.entity.Event;
 import com.kseb.collabtool.domain.events.entity.EventTask;
 import com.kseb.collabtool.domain.events.entity.OwnerType;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +83,47 @@ public class EventTaskService {
         eventTaskRepository.save(task);
 
         return new EventTaskResponse(task);
+    }
+
+    @Transactional
+    public List<EventTaskResponse> getTasksByEvent(Long eventId, Long currentUserId) {
+        // 이벤트 조회
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new GeneralException(Status.EVENT_NOT_FOUND));
+
+        OwnerType ownerType = event.getOwnerType();
+        Long ownerId = event.getOwnerId();
+
+        //개인은 본인만, 그룹은 멤버만 조회 가능
+        if (ownerType == OwnerType.USER) {
+            if (!ownerId.equals(currentUserId)) {
+                throw new GeneralException(Status.NO_AUTHORITY);
+            }
+        } else if (ownerType == OwnerType.GROUP) {
+            if (!groupMemberRepository.existsByGroupIdAndUserId(ownerId, currentUserId)) {
+                throw new GeneralException(Status.NO_AUTHORITY);
+            }
+        } else {
+            throw new GeneralException(Status.BAD_REQUEST);
+        }
+
+        // 해당 이벤트의 할 일 목록 조회
+        List<EventTask> tasks = eventTaskRepository.findByEvent_Id(eventId);
+
+        // DTO 변환해서 던져줌
+        return tasks.stream()
+                .map(EventTaskResponse::new)
+                .toList();
+    }
+
+
+    @Transactional
+    public List<MyTaskResponse> getTasksByAssignee(Long assigneeId, Long currentUserId) { //이벤트랑 해당 이벤트에서 해야되는 task 반환
+        if (!assigneeId.equals(currentUserId)) { //현재 유저랑 담당자 같은지 확인
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+        List<EventTask> tasks = eventTaskRepository.findByAssignee_Id(assigneeId);
+        return tasks.stream().map(MyTaskResponse::new).toList();
     }
 
 }
