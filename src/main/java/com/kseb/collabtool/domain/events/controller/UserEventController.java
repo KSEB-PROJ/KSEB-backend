@@ -1,7 +1,7 @@
 package com.kseb.collabtool.domain.events.controller;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponseDto;
+import com.kseb.collabtool.domain.events.dto.EventResponse;
 import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.service.UserEventService;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -47,11 +47,11 @@ public class UserEventController {
 
     //조회
     @GetMapping
-    public ResponseEntity<List<EventResponseDto>> getMyEvents(
+    public ResponseEntity<List<EventResponse>> getMyEvents(
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
-        List<EventResponseDto> events = eventService.getAllEventsForUser(user.getId());
+        List<EventResponse> events = eventService.getAllEventsForUser(user.getId());
         return ResponseEntity.ok(events);
     }
 

@@ -1,7 +1,7 @@
 package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponseDto;
+import com.kseb.collabtool.domain.events.dto.EventResponse;
 import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.entity.*;
 import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
@@ -75,10 +75,10 @@ public class UserEventService {
     }
 
     @Transactional
-    public List<EventResponseDto> getAllEventsForUser(Long userId) {
+    public List<EventResponse> getAllEventsForUser(Long userId) {
         List<Event> events = eventRepository.findAllEventsForUser(userId);
         return events.stream()
-                .map(EventResponseDto::from)
+                .map(EventResponse::from)
                 .collect(Collectors.toList());
     }
 }

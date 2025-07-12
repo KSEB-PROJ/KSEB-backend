@@ -1,7 +1,7 @@
 package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponseDto;
+import com.kseb.collabtool.domain.events.dto.EventResponse;
 import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
 import com.kseb.collabtool.domain.events.entity.*;
 import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
@@ -97,10 +97,10 @@ public class GroupEventService {
     }
 
     @Transactional
-    public List<EventResponseDto> getGroupEvents(Long groupId) {
+    public List<EventResponse> getGroupEvents(Long groupId) {
         List<Event> events = eventRepository.findByOwnerTypeAndOwnerId(OwnerType.GROUP, groupId);
         return events.stream()
-                .map(EventResponseDto::from)
+                .map(EventResponse::from)
                 .collect(Collectors.toList());
     }
 
