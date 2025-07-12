@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class EventCreateResult {
+public class EventCreateResult {  //생성 시 스케줄 겹침 여부를 알려줌
     private Long eventId;
-    private boolean hasOverlap;
+    private boolean hasOverlap; //겹치는 여부
 }

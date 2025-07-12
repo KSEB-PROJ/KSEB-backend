@@ -1,7 +1,7 @@
 package com.kseb.collabtool.domain.events.controller;
 
 import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponseDto;
+import com.kseb.collabtool.domain.events.dto.EventResponse;
 import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
 import com.kseb.collabtool.domain.events.dto.ParticipantStatusUpdateRequest;
 import com.kseb.collabtool.domain.events.service.GroupEventService;
@@ -49,10 +49,10 @@ public class GroupEventController {
 
     //조회
     @GetMapping
-    public ResponseEntity<List<EventResponseDto>> getGroupEvents(
+    public ResponseEntity<List<EventResponse>> getGroupEvents(
             @PathVariable Long groupId
     ) {
-        List<EventResponseDto> events = groupEventService.getGroupEvents(groupId);
+        List<EventResponse> events = groupEventService.getGroupEvents(groupId);
         return ResponseEntity.ok(events);
     }
 
