@@ -3,6 +3,7 @@ package com.kseb.collabtool.domain.events.service;
 import com.kseb.collabtool.domain.events.dto.EventTaskCreateRequest;
 import com.kseb.collabtool.domain.events.dto.EventTaskResponse;
 import com.kseb.collabtool.domain.events.dto.MyTaskResponse;
+import com.kseb.collabtool.domain.events.dto.UpdateTaskRequest;
 import com.kseb.collabtool.domain.events.entity.Event;
 import com.kseb.collabtool.domain.events.entity.EventTask;
 import com.kseb.collabtool.domain.events.entity.OwnerType;
@@ -124,6 +125,52 @@ public class EventTaskService {
         }
         List<EventTask> tasks = eventTaskRepository.findByAssignee_Id(assigneeId);
         return tasks.stream().map(MyTaskResponse::new).toList();
+    }
+
+    @Transactional
+    public EventTaskResponse updateTask(Long taskId, UpdateTaskRequest req, Long currentUserId) {
+        EventTask task = eventTaskRepository.findById(taskId)
+                .orElseThrow(() -> new GeneralException(Status.TASK_NOT_FOUND));
+
+        Event event = task.getEvent();
+        OwnerType ownerType = event.getOwnerType();
+        Long ownerId = event.getOwnerId();
+
+        // 권한 체크 (위에 내용과 동일)
+        boolean canEdit = false;
+        if (ownerType == OwnerType.USER) {
+            canEdit = task.getAssignee().getId().equals(currentUserId);
+        } else if (ownerType == OwnerType.GROUP) {
+            canEdit = groupMemberRepository.existsByGroupIdAndUserId(ownerId, currentUserId);
+        }
+        if (!canEdit) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+
+        // patch로 프론트에서 보낸 값만 바꿔줌
+        if (req.getTitle() != null) {
+            task.setTitle(req.getTitle());
+        }
+        if (req.getAssigneeId() != null) {
+            // 담당자 변경: 그룹 일정이면 해당 그룹 멤버만 허용
+            User assignee = userRepository.findById(req.getAssigneeId())
+                    .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
+            if (ownerType == OwnerType.GROUP && !groupMemberRepository.existsByGroupIdAndUserId(ownerId, req.getAssigneeId())) {
+                throw new GeneralException(Status.NO_AUTHORITY);
+            }
+            task.setAssignee(assignee);
+        }
+        if (req.getStatusId() != null) {
+            TaskStatus status = taskStatusRepository.findById(req.getStatusId())
+                    .orElseThrow(() -> new GeneralException(Status.BAD_REQUEST));
+            task.setTaskStatus(status);
+        }
+        if (req.getDueDatetime() != null) {
+            task.setDueDatetime(req.getDueDatetime());
+        }
+        task.setUpdatedAt(LocalDateTime.now());
+
+        return new EventTaskResponse(task);
     }
 
 }
