@@ -173,4 +173,26 @@ public class EventTaskService {
         return new EventTaskResponse(task);
     }
 
+
+    @Transactional
+    public void deleteTask(Long taskId, Long currentUserId) {
+        EventTask task = eventTaskRepository.findById(taskId)
+                .orElseThrow(() -> new GeneralException(Status.TASK_NOT_FOUND));
+        Event event = task.getEvent();
+        OwnerType ownerType = event.getOwnerType();
+        Long ownerId = event.getOwnerId();
+
+        //개인은 본인만, 그룹은 멤버만 삭제 가능
+        boolean canDelete = false;
+        if (ownerType == OwnerType.USER) {
+            canDelete = task.getAssignee().getId().equals(currentUserId);
+        } else if (ownerType == OwnerType.GROUP) {
+            canDelete = groupMemberRepository.existsByGroupIdAndUserId(ownerId, currentUserId);
+        }
+        if (!canDelete) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+        eventTaskRepository.delete(task);
+    }
+
 }

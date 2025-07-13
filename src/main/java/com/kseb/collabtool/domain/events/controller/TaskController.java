@@ -38,4 +38,14 @@ public class TaskController {
         EventTaskResponse response = eventTaskService.updateTask(taskId, request, userId);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        Long userId = currentUser.getUser().getId();
+        eventTaskService.deleteTask(taskId, userId);
+        return ResponseEntity.noContent().build();
+    }
 }
