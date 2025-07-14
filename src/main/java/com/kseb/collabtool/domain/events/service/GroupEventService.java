@@ -55,6 +55,7 @@ public class GroupEventService {
         groupEvent.setEndDatetime(dto.getEndDatetime());
         groupEvent.setAllDay(dto.isAllDay());
         groupEvent.setRrule(dto.getRrule());
+        groupEvent.setThemeColor(dto.getThemeColor());
         groupEvent.setCreatedBy(creator);
         groupEvent.setUpdatedBy(creator);
         groupEvent.setCreatedAt(LocalDateTime.now());
@@ -145,6 +146,7 @@ public class GroupEventService {
         if (dto.getEndDatetime() != null) event.setEndDatetime(dto.getEndDatetime());
         if (dto.getAllDay() != null) event.setAllDay(dto.getAllDay());
         if (dto.getRrule() != null) event.setRrule(dto.getRrule());
+        if (dto.getThemeColor() != null) event.setThemeColor(dto.getThemeColor());
 
         User updater = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));

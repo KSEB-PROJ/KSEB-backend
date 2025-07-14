@@ -11,7 +11,7 @@ import java.time.LocalTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CourseTimetableDto {
     private Long id;
-    private Long userId;    // 👈 추가 (User 연관관계면 필요)
+    private Long userId;
     private String courseCode;
     private String courseName;
     private String professor;
@@ -25,6 +25,7 @@ public class CourseTimetableDto {
     private LocalTime endTime;
     private String location;
     private String rrule;
+    private String themeColor;
 
     public static CourseTimetableDto fromEntity(CourseTimetable timetable) {
         return CourseTimetableDto.builder()
@@ -41,6 +42,7 @@ public class CourseTimetableDto {
                 .endTime(timetable.getEndTime())
                 .location(timetable.getLocation())
                 .rrule(timetable.getRrule())
+                .themeColor(timetable.getThemeColor())
                 .build();
     }
 
