@@ -56,8 +56,10 @@ public enum Status {
     // ==== 공지 ====
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다."),
     INVALID_PINNED_UNTIL(HttpStatus.BAD_REQUEST, "notice.invalid_pinned_until", "만료시간이 현재보다 이전일 수 없습니다."),
+    NOTICE_PROMOTE_ONLY_SELF(HttpStatus.FORBIDDEN, "notice.promote_only_self", "본인이 작성한 메시지만 공지로 승격할 수 있습니다."),
     // ==== 스케쥴 ====
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "schedule.not_found", "일정이 존재하지 않습니다."),
+
 
     // ==== 강의 시간표 ====
     TIMETABLE_OVERLAP(HttpStatus.CONFLICT, "timetable.overlap", "겹치는 강의 시간표가 이미 존재합니다."),

@@ -9,8 +9,12 @@ import com.kseb.collabtool.domain.message.entity.Message;
 import com.kseb.collabtool.domain.message.entity.MessageType;
 import com.kseb.collabtool.domain.message.repository.MessageRepository;
 import com.kseb.collabtool.domain.message.repository.MessageTypeRepository;
+import com.kseb.collabtool.domain.notice.entity.Notice;
+import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
+import com.kseb.collabtool.global.exception.GeneralException;
+import com.kseb.collabtool.global.exception.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
-
+    private final NoticeRepository noticeRepository;
     private final MessageRepository messageRepository;
     private final MessageTypeRepository messageTypeRepository;
     private final ChannelRepository channelRepository;
@@ -100,4 +104,31 @@ public class MessageService {
                 .createdAt(message.getCreatedAt())
                 .build();
     }
+    public Notice promoteMessageToNotice(Long channelId, Long messageId, Long userId) {
+        // 메시지 조회
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+
+        // 채널 체크
+        if (!message.getChannel().getId().equals(channelId)) {
+            throw new GeneralException(Status.BAD_REQUEST); // 필요시 별도의 Status 추가 가능
+        }
+
+        // **작성자(로그인 유저)와 메시지 작성자 일치 체크**
+        if (!message.getUser().getId().equals(userId)) {
+            throw new GeneralException(Status.NOTICE_PROMOTE_ONLY_SELF); // Status에 추가한 항목 사용
+        }
+
+        // 공지 생성 (Notice)
+        Notice notice = new Notice();
+        notice.setGroup(message.getChannel().getGroup());
+        notice.setChannel(message.getChannel());
+        notice.setUser(message.getUser());
+        notice.setSourceMessage(message);
+        notice.setContent(message.getContent());
+        notice.setCreatedAt(java.time.LocalDateTime.now());
+
+        return noticeRepository.save(notice);
+    }
+
 }
