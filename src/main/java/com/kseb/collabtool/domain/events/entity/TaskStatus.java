@@ -22,5 +22,13 @@ public class TaskStatus {
     @Column(length = 20)
     private String color; // 상태별 색상 (hex)
 
+    /* 기본 셋팅값
+    INSERT INTO task_statuses (code, name, color)
+    VALUES
+  ('TODO', '할 일', '#FF0000'),   -- 빨강
+  ('DOING', '진행', '#FFA500'),   -- 주황
+  ('DONE', '완료', '#008000');    -- 초록
+
+     */
 }
 

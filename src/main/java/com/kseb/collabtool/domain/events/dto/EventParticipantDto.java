@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventParticipantDto {
+public class EventParticipantDto { //스케쥴 참여자
     private Long userId;
     private String userName;
     private ParticipantStatus status;

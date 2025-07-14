@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventResponseDto {
+public class EventResponse {
     private Long eventId;
     private String title;
     private String description;
@@ -26,11 +26,11 @@ public class EventResponseDto {
     private Long ownerId;
     private List<EventParticipantDto> participants;
 
-    public static EventResponseDto from(Event event) {
+    public static EventResponse from(Event event) {
         List<EventParticipantDto> participants = event.getParticipants().stream()
                 .map(EventParticipantDto::from)
                 .collect(Collectors.toList());
-        return new EventResponseDto(
+        return new EventResponse(
                 event.getId(),
                 event.getTitle(),
                 event.getDescription(),

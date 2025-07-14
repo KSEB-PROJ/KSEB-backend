@@ -46,6 +46,7 @@ public enum Status {
     // ==== 이벤트 ====
     EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "event.not_found", "이벤트를 찾을 수 없습니다."),
     NO_AUTHORITY(HttpStatus.FORBIDDEN, "event.no_authority", "이벤트에 대한 권한이 없습니다."),
+    TASK_NOT_FOUND(HttpStatus.FORBIDDEN, "task.not_found", "할 일을 찾을 수 없습니다."),
 
     // ==== 파일 ====
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "file.not_found", "파일이 존재하지 않습니다."),
