@@ -86,16 +86,16 @@ public class GroupService {
                 )).toList();
 
         // 공지채널 정보 ??????
-        Long noticeChannelId = group.getNoticeChannel() != null ? group.getNoticeChannel().getId() : null;
-        String noticeChannelName = group.getNoticeChannel() != null ? group.getNoticeChannel().getName() : null;
+        /*Long noticeChannelId = group.getNoticeChannel() != null ? group.getNoticeChannel().getId() : null;
+        String noticeChannelName = group.getNoticeChannel() != null ? group.getNoticeChannel().getName() : null;*/
 
         //반환 DTO 구성
         return new GroupDetailDto(
                 group.getId(),
                 group.getName(),
                 group.getCode(),
-                noticeChannelId,
-                noticeChannelName,
+                //noticeChannelId,
+                //noticeChannelName,
                 members,
                 members.size()
         );
