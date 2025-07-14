@@ -2,7 +2,7 @@ package com.kseb.collabtool.domain.events.service;
 
 import com.kseb.collabtool.domain.events.dto.EventTaskCreateRequest;
 import com.kseb.collabtool.domain.events.dto.EventTaskResponse;
-import com.kseb.collabtool.domain.events.dto.MyTaskResponse;
+import com.kseb.collabtool.domain.events.dto.TaskResponse;
 import com.kseb.collabtool.domain.events.dto.UpdateTaskRequest;
 import com.kseb.collabtool.domain.events.entity.Event;
 import com.kseb.collabtool.domain.events.entity.EventTask;
@@ -119,12 +119,12 @@ public class EventTaskService {
 
 
     @Transactional
-    public List<MyTaskResponse> getTasksByAssignee(Long assigneeId, Long currentUserId) { //이벤트랑 해당 이벤트에서 해야되는 task 반환
+    public List<TaskResponse> getTasksByAssignee(Long assigneeId, Long currentUserId) { //이벤트랑 해당 이벤트에서 해야되는 task 반환
         if (!assigneeId.equals(currentUserId)) { //현재 유저랑 담당자 같은지 확인
             throw new GeneralException(Status.NO_AUTHORITY);
         }
         List<EventTask> tasks = eventTaskRepository.findByAssignee_Id(assigneeId);
-        return tasks.stream().map(MyTaskResponse::new).toList();
+        return tasks.stream().map(TaskResponse::new).toList();
     }
 
     @Transactional
@@ -195,4 +195,18 @@ public class EventTaskService {
         eventTaskRepository.delete(task);
     }
 
+
+
+    @Transactional
+    public List<TaskResponse> getTasksByGroup(Long groupId, Long currentUserId) {
+        //그룹 멤버 권한 체크
+        if (!groupMemberRepository.existsByGroupIdAndUserId(groupId, currentUserId)) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+        //해당 그룹 일정에 속한 모든 Task 조회
+        List<EventTask> tasks = eventTaskRepository.findByGroupId(OwnerType.GROUP, groupId);
+
+        //DTO 변환 (이벤트 정보 포함)
+        return tasks.stream().map(TaskResponse::new).toList();
+    }
 }
