@@ -8,6 +8,7 @@ import com.kseb.collabtool.domain.notice.dto.*;
 import com.kseb.collabtool.domain.notice.entity.Notice;
 import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
 import com.kseb.collabtool.domain.user.entity.User;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,17 +44,17 @@ public class NoticeService {
         notice.setCreatedAt(LocalDateTime.now());
 
         noticeRepository.save(notice);
-        return toResponse(notice);
+        return NoticeResponse.fromEntity(notice);
     }
 
     public List<NoticeResponse> getNoticeList(Long groupId) {
         return noticeRepository.findByGroup_IdOrderByPinnedUntilDescCreatedAtDesc(groupId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(NoticeResponse::fromEntity).collect(Collectors.toList());
     }
 
     public NoticeResponse getNotice(Long noticeId) {
         return noticeRepository.findById(noticeId)
-                .map(this::toResponse)
+                .map(NoticeResponse::fromEntity)
                 .orElseThrow(() -> new GeneralException(Status.NOTICE_NOT_FOUND));
     }
 
@@ -72,7 +73,7 @@ public class NoticeService {
             }
             notice.setPinnedUntil(req.getPinnedUntil());
         }
-        return toResponse(notice);
+        return NoticeResponse.fromEntity(notice);
     }
 
     @Transactional
@@ -87,22 +88,10 @@ public class NoticeService {
         if (req.getPinnedUntil() != null && req.getPinnedUntil().isBefore(LocalDateTime.now())) {
             throw new GeneralException(Status.INVALID_PINNED_UNTIL); // 추가 필요!
         }
-        notice.setPinnedUntil(req.getPinnedUntil());
-        return toResponse(notice);
+        noticeRepository.save(notice);
+        return NoticeResponse.fromEntity(notice);
     }
 
-    private NoticeResponse toResponse(Notice notice) {
-        return NoticeResponse.builder()
-                .id(notice.getId())
-                .groupId(notice.getGroup() != null ? notice.getGroup().getId() : null)
-                .channelId(notice.getChannel() != null ? notice.getChannel().getId() : null)
-                .userId(notice.getUser() != null ? notice.getUser().getId() : null)
-                .content(notice.getContent())
-                .sourceMessageId(notice.getSourceMessage() != null ? notice.getSourceMessage().getId() : null)
-                .pinnedUntil(notice.getPinnedUntil())
-                .createdAt(notice.getCreatedAt())
-                .updatedAt(notice.getUpdatedAt())
-                .build();
-    }
+
 
 }
