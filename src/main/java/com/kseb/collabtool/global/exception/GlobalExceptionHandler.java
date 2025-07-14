@@ -108,7 +108,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ) {
         log.error("=== [UNEXPECTED ERROR] ===");
         log.error("Exception: {}", ex.getClass().getName());
-        log.error("Message: {}", ex.getMessage(), ex); // 스택트레이스 포함
+        log.error("Message: {}", ex.getMessage(), ex);
 
         Body body = Status.INTERNAL_SERVER_ERROR.getBody();
         ApiResponse<Object> response = ApiResponse.onFailure(body.getCode(), body.getMessage(), null);
@@ -117,4 +117,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex, response, HttpHeaders.EMPTY, HttpStatus.INTERNAL_SERVER_ERROR, webRequest
         );
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        Body body = Status.BAD_REQUEST.getBody();
+        ApiResponse<Object> response = ApiResponse.onFailure(body.getCode(), ex.getMessage(), null);
+        return ResponseEntity.status(body.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalState(IllegalStateException ex) {
+        Body body = Status.FORBIDDEN.getBody();
+        ApiResponse<Object> response = ApiResponse.onFailure(body.getCode(), ex.getMessage(), null);
+        return ResponseEntity.status(body.getHttpStatus()).body(response);
+    }
+
 }

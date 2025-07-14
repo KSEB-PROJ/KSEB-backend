@@ -61,6 +61,9 @@ public class MessageService {
     public ChatResponse updateMessage(Long userId, Long messageId, ChatRequest request) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+        if (message.isDeleted()) {
+            throw new IllegalStateException("이미 삭제된 메시지입니다.");
+        }
         if (!message.getUser().getId().equals(userId)) {
             throw new IllegalStateException("본인이 작성한 메시지만 수정할 수 있습니다.");
         }
@@ -91,7 +94,7 @@ public class MessageService {
                 .id(message.getId())
                 .channelId(message.getChannel().getId())
                 .userId(message.getUser().getId())
-                .userName(message.getUser().getName()) // User 엔티티에 getName()이 있다고 가정
+                .userName(message.getUser().getName())
                 .content(message.getContent())
                 .messageType(message.getMessageType().getCode())
                 .fileUrl(message.getFileUrl())
