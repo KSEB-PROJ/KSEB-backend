@@ -11,5 +11,5 @@ public class GroupListDto {
     private Long id;
     private String name;
     private String code;
-    private Long noticeChannelId;
+    //private Long noticeChannelId;
 }
