@@ -8,7 +8,7 @@ import com.kseb.collabtool.domain.notice.entity.Notice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.kseb.collabtool.domain.notice.dto.NoticePromoteRequest;
 import java.security.Principal;
 import java.util.List;
 
@@ -72,12 +72,13 @@ public class ChatController {
     public ResponseEntity<NoticeResponse> promoteMessageToNotice(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
+            @RequestBody NoticePromoteRequest request,
             Principal principal
     ) {
         Long userId = Long.parseLong(principal.getName());
-        Notice notice = messageService.promoteMessageToNotice(channelId, messageId, userId);
-        // Notice → NoticeResponse로 변환
-        NoticeResponse response = NoticeResponse.fromEntity(notice);
+        NoticeResponse response = messageService.promoteMessageToNotice(
+                channelId, messageId, userId, request.getPinnedUntil()
+        );
         return ResponseEntity.ok(response);
     }
 }

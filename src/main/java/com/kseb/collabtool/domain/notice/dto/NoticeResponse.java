@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class NoticeResponse {
+
     private Long id;
     private Long groupId;
     private Long channelId;
@@ -20,13 +21,15 @@ public class NoticeResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+
+
     public static NoticeResponse fromEntity(Notice notice) {
         return NoticeResponse.builder()
                 .id(notice.getId())
                 .groupId(notice.getGroup() != null ? notice.getGroup().getId() : null)
                 .channelId(notice.getChannel() != null ? notice.getChannel().getId() : null)
                 .userId(notice.getUser() != null ? notice.getUser().getId() : null)
-                .userName(notice.getUser() != null ? notice.getUser().getName() : null)
+                .userName(notice.getUser() != null ? notice.getUser().getName() : null) // ★
                 .content(notice.getContent())
                 .sourceMessageId(notice.getSourceMessage() != null ? notice.getSourceMessage().getId() : null)
                 .pinnedUntil(notice.getPinnedUntil())

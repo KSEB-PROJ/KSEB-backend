@@ -3,12 +3,12 @@ package com.kseb.collabtool.domain.message.service;
 import com.kseb.collabtool.domain.channel.entity.Channel;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
-
 import com.kseb.collabtool.domain.channel.repository.ChannelRepository;
 import com.kseb.collabtool.domain.message.entity.Message;
 import com.kseb.collabtool.domain.message.entity.MessageType;
 import com.kseb.collabtool.domain.message.repository.MessageRepository;
 import com.kseb.collabtool.domain.message.repository.MessageTypeRepository;
+import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
 import com.kseb.collabtool.domain.notice.entity.Notice;
 import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -18,13 +18,14 @@ import com.kseb.collabtool.global.exception.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
+
     private final NoticeRepository noticeRepository;
     private final MessageRepository messageRepository;
     private final MessageTypeRepository messageTypeRepository;
@@ -71,7 +72,6 @@ public class MessageService {
         if (request.getContent() != null) message.setContent(request.getContent());
         if (request.getFileUrl() != null) message.setFileUrl(request.getFileUrl());
         if (request.getFileName() != null) message.setFileName(request.getFileName());
-        // 메시지 타입 변경은 필요시만 허용
         if (request.getMessageTypeId() != null) {
             MessageType messageType = messageTypeRepository.findById(request.getMessageTypeId())
                     .orElseThrow(() -> new IllegalArgumentException("메시지 타입이 존재하지 않습니다."));
@@ -95,7 +95,7 @@ public class MessageService {
                 .id(message.getId())
                 .channelId(message.getChannel().getId())
                 .userId(message.getUser().getId())
-                .userName(message.getUser().getName()) // User 엔티티에 getName()이 있다고 가정
+                .userName(message.getUser().getName())
                 .content(message.getContent())
                 .messageType(message.getMessageType().getCode())
                 .fileUrl(message.getFileUrl())
@@ -104,7 +104,14 @@ public class MessageService {
                 .createdAt(message.getCreatedAt())
                 .build();
     }
-    public Notice promoteMessageToNotice(Long channelId, Long messageId, Long userId) {
+
+    @Transactional
+    public NoticeResponse promoteMessageToNotice(
+            Long channelId,
+            Long messageId,
+            Long userId,
+            LocalDateTime pinnedUntil // 추가!
+    ) {
         // 메시지 조회
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
@@ -114,21 +121,24 @@ public class MessageService {
             throw new GeneralException(Status.BAD_REQUEST); // 필요시 별도의 Status 추가 가능
         }
 
-        // **작성자(로그인 유저)와 메시지 작성자 일치 체크**
+        // 작성자(로그인 유저)와 메시지 작성자 일치 체크
         if (!message.getUser().getId().equals(userId)) {
-            throw new GeneralException(Status.NOTICE_PROMOTE_ONLY_SELF); // Status에 추가한 항목 사용
+            throw new GeneralException(Status.FORBIDDEN); // 본인만 승격 가능
         }
 
-        // 공지 생성 (Notice)
+        // 공지 생성
         Notice notice = new Notice();
         notice.setGroup(message.getChannel().getGroup());
         notice.setChannel(message.getChannel());
         notice.setUser(message.getUser());
         notice.setSourceMessage(message);
         notice.setContent(message.getContent());
-        notice.setCreatedAt(java.time.LocalDateTime.now());
+        notice.setPinnedUntil(pinnedUntil);
+        notice.setCreatedAt(LocalDateTime.now());
 
-        return noticeRepository.save(notice);
+        Notice saved = noticeRepository.save(notice);
+
+        // NoticeResponse로 변환해서 리턴
+        return NoticeResponse.fromEntity(saved);
     }
-
 }
