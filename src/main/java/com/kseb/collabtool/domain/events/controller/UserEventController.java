@@ -7,6 +7,7 @@ import com.kseb.collabtool.domain.events.dto.UserEventCreateRequest;
 import com.kseb.collabtool.domain.events.service.UserEventService;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +24,7 @@ public class UserEventController {
 
     @PostMapping
     public ResponseEntity<EventCreateResult> createUserEvent(
-            @RequestBody UserEventCreateRequest dto,
+            @RequestBody @Valid UserEventCreateRequest dto,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user = currentUser.getUser();
@@ -59,7 +60,7 @@ public class UserEventController {
     @PatchMapping("/{eventId}")
     public ResponseEntity<Void> patchUserEvent(
             @PathVariable Long eventId,
-            @RequestBody EventUpdateRequest dto,
+            @RequestBody @Valid EventUpdateRequest dto,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         Long userId = currentUser.getUser().getId();
