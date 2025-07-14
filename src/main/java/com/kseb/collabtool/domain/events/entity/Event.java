@@ -7,11 +7,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import com.kseb.collabtool.domain.timetable.entity.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+@Builder
 @Entity
 @Table(name = "events")
 @Data
@@ -66,6 +66,18 @@ public class Event {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    @Column(length = 20)
+    private String courseCode;
+
+    @Column(length = 50)
+    private String professor;
+
+    @Column(length = 10)
+    private String semester;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week")
+    private DayOfWeek dayOfWeek;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)

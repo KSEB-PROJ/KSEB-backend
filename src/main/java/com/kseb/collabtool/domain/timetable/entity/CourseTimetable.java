@@ -1,5 +1,6 @@
 package com.kseb.collabtool.domain.timetable.entity;
 
+import com.kseb.collabtool.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalTime;
@@ -10,6 +11,10 @@ import java.time.LocalDateTime;
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class CourseTimetable {
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
