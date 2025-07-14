@@ -53,11 +53,11 @@ public class GroupController {
 
     // 그룹 삭제
     @DeleteMapping("/{groupId}")
-    public ResponseEntity<Void> deleteGroup(
-            @PathVariable Long groupId,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId,
+                                         @AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = currentUser.getUser();
-        groupService.deleteGroup(groupId, user);
-        return ResponseEntity.noContent().build(); //build 사용 했는데, 잘 모르겐
+        groupService.deleteGroupAndAllData(groupId, user);
+        return ResponseEntity.noContent().build(); // 204 No Content 반환
     }
 }
+

@@ -1,5 +1,7 @@
 package com.kseb.collabtool.domain.groups.service;
 
+import com.kseb.collabtool.domain.events.entity.OwnerType;
+import com.kseb.collabtool.domain.events.repository.EventRepository;
 import com.kseb.collabtool.domain.groups.dto.GroupCreateRequest;
 import com.kseb.collabtool.domain.groups.dto.GroupDetailDto;
 import com.kseb.collabtool.domain.groups.dto.GroupListDto;
@@ -33,6 +35,8 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
 
     private final MemberRoleRepository memberRoleRepository;
+
+    private final EventRepository eventRepository;
 
     @Transactional
     public GroupResponse createGroup(GroupCreateRequest groupCreateRequest, User owner) {
@@ -82,23 +86,23 @@ public class GroupService {
                 )).toList();
 
         // 공지채널 정보 ??????
-        Long noticeChannelId = group.getNoticeChannel() != null ? group.getNoticeChannel().getId() : null;
-        String noticeChannelName = group.getNoticeChannel() != null ? group.getNoticeChannel().getName() : null;
+        /*Long noticeChannelId = group.getNoticeChannel() != null ? group.getNoticeChannel().getId() : null;
+        String noticeChannelName = group.getNoticeChannel() != null ? group.getNoticeChannel().getName() : null;*/
 
         //반환 DTO 구성
         return new GroupDetailDto(
                 group.getId(),
                 group.getName(),
                 group.getCode(),
-                noticeChannelId,
-                noticeChannelName,
+                //noticeChannelId,
+                //noticeChannelName,
                 members,
                 members.size()
         );
     }
 
     @Transactional
-    public void deleteGroup(Long groupId, User currentUser) {
+    public void deleteGroupAndAllData(Long groupId, User currentUser) {
         //그룹 조회
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
@@ -107,6 +111,11 @@ public class GroupService {
         if (!group.getOwner().getId().equals(currentUser.getId())) {
             throw new GeneralException(Status.GROUP_DELETE_FORBIDDEN);
         }
+
+
+        //이벤트 등 외부 연관 데이터 직접 삭제 (ownerType/ownerId 조합)
+        eventRepository.deleteByOwnerTypeAndOwnerId(OwnerType.GROUP, groupId);
+
         //삭제
         groupRepository.delete(group);
     }
