@@ -2,6 +2,7 @@ package com.kseb.collabtool.domain.events.dto;
 
 import com.kseb.collabtool.domain.events.entity.Event;
 import com.kseb.collabtool.domain.events.entity.OwnerType;
+import com.kseb.collabtool.global.validation.ValidRRule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class EventResponse {
     private LocalDateTime startDatetime;
     private LocalDateTime endDatetime;
     private Boolean allDay;
+    @ValidRRule
     private String rrule;
     private OwnerType ownerType;
     private Long ownerId;

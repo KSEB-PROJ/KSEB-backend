@@ -22,7 +22,7 @@ public class GroupEventController {
     @PostMapping
     public ResponseEntity<EventCreateResult> createGroupEvent(
             @PathVariable Long groupId,
-            @RequestBody GroupEventCreateRequest dto,
+            @RequestBody @Valid GroupEventCreateRequest dto,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         // groupId를 dto에 주입 (path와 body의 일치 보장)
@@ -70,7 +70,7 @@ public class GroupEventController {
     public ResponseEntity<Void> patchGroupEvent(
             @PathVariable Long groupId,
             @PathVariable Long eventId,
-            @RequestBody EventUpdateRequest dto,
+            @RequestBody @Valid EventUpdateRequest dto,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         Long userId = currentUser.getUser().getId();
