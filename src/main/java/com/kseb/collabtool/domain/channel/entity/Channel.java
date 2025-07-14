@@ -1,6 +1,7 @@
 package com.kseb.collabtool.domain.channel.entity;
 
 import com.kseb.collabtool.domain.groups.entity.Group;
+import com.kseb.collabtool.domain.message.entity.Message;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
@@ -9,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "channels")
@@ -38,4 +40,6 @@ public class Channel {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now(); // 생성일시
 
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages;
 }

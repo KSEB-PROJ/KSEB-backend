@@ -17,7 +17,7 @@ public class ChannelType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Short id; // TINYINT와 매핑, PK
 
-    @Column(nullable = false, unique = true, length = 32)
+    @Column(nullable = false, unique = true, length = 32) //insert로 추가해야됨
     private String code; // CHAT / CALENDAR / NOTICE 등 1 2 3
 
     @Column(nullable = false, length = 64)

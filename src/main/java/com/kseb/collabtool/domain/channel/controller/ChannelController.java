@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/groups/{groupId}")
+@RequestMapping("/api/groups/{groupId}")
 public class ChannelController {
 
     private final ChannelService channelService;
