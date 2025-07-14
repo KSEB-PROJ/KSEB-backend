@@ -63,7 +63,7 @@ public class CourseTimetableService {
         // RRULE 자동 생성 (매주 해당 요일, 학기 끝까지)
         String rrule = generateRrule(dto.getDayOfWeek(), semesterEnd);
 
-        // 시간표 저장 (RRULE 자동 저장)
+        // 시간표 저장 (themeColor 필수)
         CourseTimetable saved = courseTimetableRepository.save(
                 CourseTimetable.builder()
                         .user(User.builder().id(userId).build())
@@ -76,9 +76,10 @@ public class CourseTimetableService {
                         .endTime(dto.getEndTime())
                         .location(dto.getLocation())
                         .rrule(rrule)
+                        .themeColor(dto.getThemeColor())   // ★ 추가!
                         .build());
 
-        // Event에도 RRULE 포함 저장
+        // Event에도 RRULE + themeColor 저장
         eventRepository.save(Event.builder()
                 .ownerType(OwnerType.USER)
                 .ownerId(userId)
@@ -92,6 +93,7 @@ public class CourseTimetableService {
                 .location(saved.getLocation())
                 .allDay(false)
                 .rrule(rrule)
+                .themeColor(saved.getThemeColor()) // ★ 추가!
                 .build());
 
         return CourseTimetableDto.fromEntity(saved);
@@ -131,13 +133,14 @@ public class CourseTimetableService {
         if (dto.getStartTime() != null) entity.setStartTime(dto.getStartTime());
         if (dto.getEndTime() != null) entity.setEndTime(dto.getEndTime());
         if (dto.getLocation() != null) entity.setLocation(dto.getLocation());
+        if (dto.getThemeColor() != null) entity.setThemeColor(dto.getThemeColor()); // ★ 추가
 
         // RRULE도 새로 계산 (semester, dayOfWeek 바뀔 때)
         LocalDate[] period = getSemesterPeriod(entity.getSemester());
         String rrule = generateRrule(entity.getDayOfWeek(), period[1]);
         entity.setRrule(rrule);
 
-        // Event도 같이 수정 (rrule 적용)
+        // Event도 같이 수정 (rrule, themeColor 적용)
         Event event = eventRepository.findCourseEvent(
                 userId,
                 OwnerType.USER,
@@ -154,6 +157,7 @@ public class CourseTimetableService {
             event.setEndDatetime(combineDateTime(entity.getSemester(), entity.getDayOfWeek(), entity.getEndTime()));
             event.setLocation(entity.getLocation());
             event.setRrule(rrule);
+            event.setThemeColor(entity.getThemeColor()); // ★ 추가
         }
 
         return CourseTimetableDto.fromEntity(entity);

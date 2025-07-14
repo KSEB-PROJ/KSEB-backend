@@ -15,4 +15,5 @@ public class EventUpdateRequest {
     private LocalDateTime endDatetime;
     private Boolean allDay;
     private String rrule;
+    private String themeColor;
 }
