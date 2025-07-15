@@ -28,8 +28,6 @@ public class EventTaskResponse {
         this.statusId = task.getTaskStatus().getId();
         this.statusCode = task.getTaskStatus().getCode();
         this.statusName = task.getTaskStatus().getName();
-        this.statusCode = task.getTaskStatus().getCode();
-        this.statusName = task.getTaskStatus().getName();
         this.dueDatetime = task.getDueDatetime();
     }
 }

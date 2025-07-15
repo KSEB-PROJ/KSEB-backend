@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class MyTaskResponse { // 내가 해야되는 Task 전체를 보여줌
+public class TaskResponse { // 내가 해야되는 Task 전체를 보여줌
     private Long id;
     private String title;
     private LocalDateTime dueDatetime;
@@ -22,7 +22,7 @@ public class MyTaskResponse { // 내가 해야되는 Task 전체를 보여줌
     private LocalDateTime eventStartDatetime;
     private LocalDateTime eventEndDatetime;
     //한 유저의 모든 event(일정)과 task(할 일)을 보여줌
-    public MyTaskResponse(EventTask task) {
+    public TaskResponse(EventTask task) {
         this.id = task.getId();
         this.title = task.getTitle();
         this.dueDatetime = task.getDueDatetime();

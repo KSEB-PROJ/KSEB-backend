@@ -11,8 +11,8 @@ public class GroupDetailDto {
     private Long id;
     private String name;
     private String code;
-    private Long noticeChannelId;
-    private String noticeChannelName;
+    /*private Long noticeChannelId;
+    private String noticeChannelName;*/
     private List<MemberInfo> members;
     private int memberCount;
 

@@ -72,6 +72,7 @@ public class MessageService {
         if (request.getContent() != null) message.setContent(request.getContent());
         if (request.getFileUrl() != null) message.setFileUrl(request.getFileUrl());
         if (request.getFileName() != null) message.setFileName(request.getFileName());
+        // 메시지 타입 변경은 필요시만 허용
         if (request.getMessageTypeId() != null) {
             MessageType messageType = messageTypeRepository.findById(request.getMessageTypeId())
                     .orElseThrow(() -> new IllegalArgumentException("메시지 타입이 존재하지 않습니다."));
@@ -142,3 +143,30 @@ public class MessageService {
         return NoticeResponse.fromEntity(saved);
     }
 }
+
+    @Transactional
+    public void deleteMessage(Long userId, Long messageId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+        if (!message.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("본인이 작성한 메시지만 삭제할 수 있습니다.");
+        }
+        message.setDeleted(true);
+    }
+
+    private ChatResponse toResponse(Message message, Long currentUserId) {
+        return ChatResponse.builder()
+                .id(message.getId())
+                .channelId(message.getChannel().getId())
+                .userId(message.getUser().getId())
+                .userName(message.getUser().getName())
+                .content(message.getContent())
+                .messageType(message.getMessageType().getCode())
+                .fileUrl(message.getFileUrl())
+                .fileName(message.getFileName())
+                .isMine(message.getUser().getId().equals(currentUserId))
+                .createdAt(message.getCreatedAt())
+                .build();
+    }
+}
+

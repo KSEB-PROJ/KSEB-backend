@@ -85,7 +85,7 @@ public class GroupEventService {
         Event groupEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new GeneralException(Status.EVENT_NOT_FOUND));
 
-        if (groupEvent.getOwnerType() != OwnerType.GROUP || !groupEvent.getOwnerId().equals(groupId)) {
+        if (groupEvent.getOwnerType() != OwnerType.GROUP) {
             throw new GeneralException(Status.NO_AUTHORITY);
         }
         //그룹 속해 있나
