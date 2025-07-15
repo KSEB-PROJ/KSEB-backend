@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Table(name = "messages")
 @Data
 public class Message {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 메시지 PK
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel; // 소속 채널
@@ -41,4 +41,6 @@ public class Message {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now(); // 전송 시각
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }
