@@ -82,31 +82,6 @@ public class MessageService {
     }
 
     @Transactional
-    public void deleteMessage(Long userId, Long messageId) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
-        if (!message.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("본인이 작성한 메시지만 삭제할 수 있습니다.");
-        }
-        message.setDeleted(true);
-    }
-
-    private ChatResponse toResponse(Message message, Long currentUserId) {
-        return ChatResponse.builder()
-                .id(message.getId())
-                .channelId(message.getChannel().getId())
-                .userId(message.getUser().getId())
-                .userName(message.getUser().getName())
-                .content(message.getContent())
-                .messageType(message.getMessageType().getCode())
-                .fileUrl(message.getFileUrl())
-                .fileName(message.getFileName())
-                .isMine(message.getUser().getId().equals(currentUserId))
-                .createdAt(message.getCreatedAt())
-                .build();
-    }
-
-    @Transactional
     public NoticeResponse promoteMessageToNotice(
             Long channelId,
             Long messageId,
@@ -142,7 +117,7 @@ public class MessageService {
         // NoticeResponse로 변환해서 리턴
         return NoticeResponse.fromEntity(saved);
     }
-}
+
 
     @Transactional
     public void deleteMessage(Long userId, Long messageId) {
@@ -169,4 +144,6 @@ public class MessageService {
                 .build();
     }
 }
+
+
 
