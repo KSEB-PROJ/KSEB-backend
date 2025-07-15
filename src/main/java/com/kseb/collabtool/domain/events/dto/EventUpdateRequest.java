@@ -1,5 +1,6 @@
 package com.kseb.collabtool.domain.events.dto;
 
+import com.kseb.collabtool.global.validation.ValidRRule;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ public class EventUpdateRequest {
     private LocalDateTime startDatetime;
     private LocalDateTime endDatetime;
     private Boolean allDay;
+    @ValidRRule
     private String rrule;
     private String themeColor;
 }

@@ -2,7 +2,6 @@ package com.kseb.collabtool.domain.events.controller;
 
 import com.kseb.collabtool.domain.events.dto.EventTaskCreateRequest;
 import com.kseb.collabtool.domain.events.dto.EventTaskResponse;
-import com.kseb.collabtool.domain.events.dto.MyTaskResponse;
 import com.kseb.collabtool.domain.events.service.EventTaskService;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.security.CustomUserDetails;
@@ -15,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/events/{eventId}/tasks")
+@RequestMapping("/api/events/{eventId}/tasks")
 public class EventTaskController {
 
     private final EventTaskService eventTaskService;

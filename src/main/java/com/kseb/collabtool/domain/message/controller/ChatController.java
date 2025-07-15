@@ -68,6 +68,7 @@ public class ChatController {
         messageService.deleteMessage(userId, messageId);
         return ResponseEntity.ok().build();
     }
+  
     @PostMapping("/{messageId}/promote-notice")
     public ResponseEntity<NoticeResponse> promoteMessageToNotice(
             @PathVariable Long channelId,
@@ -81,4 +82,5 @@ public class ChatController {
         );
         return ResponseEntity.ok(response);
     }
+
 }
