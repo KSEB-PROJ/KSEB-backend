@@ -3,18 +3,22 @@ package com.kseb.collabtool.domain.message.service;
 import com.kseb.collabtool.domain.channel.entity.Channel;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
-
 import com.kseb.collabtool.domain.channel.repository.ChannelRepository;
 import com.kseb.collabtool.domain.message.entity.Message;
 import com.kseb.collabtool.domain.message.entity.MessageType;
 import com.kseb.collabtool.domain.message.repository.MessageRepository;
 import com.kseb.collabtool.domain.message.repository.MessageTypeRepository;
+import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
+import com.kseb.collabtool.domain.notice.entity.Notice;
+import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
+import com.kseb.collabtool.global.exception.GeneralException;
+import com.kseb.collabtool.global.exception.Status;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MessageService {
 
+    private final NoticeRepository noticeRepository;
     private final MessageRepository messageRepository;
     private final MessageTypeRepository messageTypeRepository;
     private final ChannelRepository channelRepository;
@@ -61,9 +66,6 @@ public class MessageService {
     public ChatResponse updateMessage(Long userId, Long messageId, ChatRequest request) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
-        if (message.isDeleted()) {
-            throw new IllegalStateException("이미 삭제된 메시지입니다.");
-        }
         if (!message.getUser().getId().equals(userId)) {
             throw new IllegalStateException("본인이 작성한 메시지만 수정할 수 있습니다.");
         }
@@ -103,4 +105,68 @@ public class MessageService {
                 .createdAt(message.getCreatedAt())
                 .build();
     }
+
+    @Transactional
+    public NoticeResponse promoteMessageToNotice(
+            Long channelId,
+            Long messageId,
+            Long userId,
+            LocalDateTime pinnedUntil // 추가!
+    ) {
+        // 메시지 조회
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+
+        // 채널 체크
+        if (!message.getChannel().getId().equals(channelId)) {
+            throw new GeneralException(Status.BAD_REQUEST); // 필요시 별도의 Status 추가 가능
+        }
+
+        // 작성자(로그인 유저)와 메시지 작성자 일치 체크
+        if (!message.getUser().getId().equals(userId)) {
+            throw new GeneralException(Status.FORBIDDEN); // 본인만 승격 가능
+        }
+
+        // 공지 생성
+        Notice notice = new Notice();
+        notice.setGroup(message.getChannel().getGroup());
+        notice.setChannel(message.getChannel());
+        notice.setUser(message.getUser());
+        notice.setSourceMessage(message);
+        notice.setContent(message.getContent());
+        notice.setPinnedUntil(pinnedUntil);
+        notice.setCreatedAt(LocalDateTime.now());
+
+        Notice saved = noticeRepository.save(notice);
+
+        // NoticeResponse로 변환해서 리턴
+        return NoticeResponse.fromEntity(saved);
+    }
 }
+
+    @Transactional
+    public void deleteMessage(Long userId, Long messageId) {
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+        if (!message.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("본인이 작성한 메시지만 삭제할 수 있습니다.");
+        }
+        message.setDeleted(true);
+    }
+
+    private ChatResponse toResponse(Message message, Long currentUserId) {
+        return ChatResponse.builder()
+                .id(message.getId())
+                .channelId(message.getChannel().getId())
+                .userId(message.getUser().getId())
+                .userName(message.getUser().getName())
+                .content(message.getContent())
+                .messageType(message.getMessageType().getCode())
+                .fileUrl(message.getFileUrl())
+                .fileName(message.getFileName())
+                .isMine(message.getUser().getId().equals(currentUserId))
+                .createdAt(message.getCreatedAt())
+                .build();
+    }
+}
+

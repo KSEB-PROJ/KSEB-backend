@@ -17,4 +17,5 @@ public class GroupEventCreateRequest {
     private boolean allDay;
     @ValidRRule
     private String rrule;
+    private String themeColor;
 }

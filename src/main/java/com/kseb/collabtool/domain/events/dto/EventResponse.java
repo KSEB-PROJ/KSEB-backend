@@ -26,7 +26,10 @@ public class EventResponse {
     private String rrule;
     private OwnerType ownerType;
     private Long ownerId;
+    private String themeColor;
     private List<EventParticipantDto> participants;
+
+
 
     public static EventResponse from(Event event) {
         List<EventParticipantDto> participants = event.getParticipants().stream()
@@ -43,6 +46,7 @@ public class EventResponse {
                 event.getRrule(),
                 event.getOwnerType(),
                 event.getOwnerId(),
+                event.getThemeColor(),
                 participants
         );
     }
