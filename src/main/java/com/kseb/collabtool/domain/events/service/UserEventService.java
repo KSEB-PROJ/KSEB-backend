@@ -46,6 +46,7 @@ public class UserEventService {
         event.setEndDatetime(dto.getEndDatetime());
         event.setAllDay(dto.isAllDay());
         event.setRrule(dto.getRrule());
+        event.setThemeColor(dto.getThemeColor());
         event.setCreatedBy(user);
         event.setUpdatedBy(user);
         event.setCreatedAt(LocalDateTime.now());
@@ -101,6 +102,7 @@ public class UserEventService {
         if (dto.getEndDatetime() != null) event.setEndDatetime(dto.getEndDatetime());
         if (dto.getAllDay() != null) event.setAllDay(dto.getAllDay());
         if (dto.getRrule() != null) event.setRrule(dto.getRrule());
+        if(dto.getThemeColor() != null) event.setThemeColor(dto.getThemeColor());
 
         // 변경자 변경일시 갱신
         User updater = userRepository.findById(userId)

@@ -16,4 +16,5 @@ public class UserEventCreateRequest {
     private boolean allDay;
     @ValidRRule
     private String rrule;
+    private String themeColor;
 }

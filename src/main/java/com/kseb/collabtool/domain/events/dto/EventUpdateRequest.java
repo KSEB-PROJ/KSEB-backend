@@ -17,4 +17,5 @@ public class EventUpdateRequest {
     private Boolean allDay;
     @ValidRRule
     private String rrule;
+    private String themeColor;
 }

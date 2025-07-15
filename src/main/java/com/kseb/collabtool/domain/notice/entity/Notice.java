@@ -38,7 +38,7 @@ public class Notice {
     private String content; // 공지 내용
 
     @Column(name = "pinned_until")
-    private LocalDateTime pinnedUntil; // 고정 만료일(상단 고정)
+    private LocalDateTime pinnedUntil; // 고정 만료일
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now(); // 생성일

@@ -3,10 +3,12 @@ package com.kseb.collabtool.domain.message.controller;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
 import com.kseb.collabtool.domain.message.service.MessageService;
+import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
+import com.kseb.collabtool.domain.notice.entity.Notice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.kseb.collabtool.domain.notice.dto.NoticePromoteRequest;
 import java.security.Principal;
 import java.util.List;
 
@@ -66,4 +68,19 @@ public class ChatController {
         messageService.deleteMessage(userId, messageId);
         return ResponseEntity.ok().build();
     }
+  
+    @PostMapping("/{messageId}/promote-notice")
+    public ResponseEntity<NoticeResponse> promoteMessageToNotice(
+            @PathVariable Long channelId,
+            @PathVariable Long messageId,
+            @RequestBody NoticePromoteRequest request,
+            Principal principal
+    ) {
+        Long userId = Long.parseLong(principal.getName());
+        NoticeResponse response = messageService.promoteMessageToNotice(
+                channelId, messageId, userId, request.getPinnedUntil()
+        );
+        return ResponseEntity.ok(response);
+    }
+
 }

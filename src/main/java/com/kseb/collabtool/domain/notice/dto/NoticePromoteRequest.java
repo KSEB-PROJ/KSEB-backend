@@ -7,6 +7,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class NoticePinRequest {
-    private LocalDateTime pinnedUntil; // 고정 해제일시 (null 이면 고정 해제)
+public class NoticePromoteRequest {
+    private LocalDateTime pinnedUntil; // 공지 고정 만료일 (null이면 일반 공지)
 }
