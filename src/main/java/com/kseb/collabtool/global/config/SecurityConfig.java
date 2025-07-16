@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.catalina.filters.CorsFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,6 +43,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults()) // CORS 활성화
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // CORS preflight(OPTIONS) 허용 안 하면 통신이 안되는 경우가 많아요~~~~^^
+                        // 브라우저는 데이터를 보내기 전 미리 OPTIONS로 한번 허락해줘 라고 사전에 물어봄(preflight)
+                        // 그래서 이거 허용 안하면 통신이 막히는 경우가 많아용
+                        // 근데 이거 보통 자동으로 허가 해주는데 뭐지...?
+                        // 아 모르겠다~
                         .requestMatchers(
                                 "/login",
                                 "/api/auth/register",

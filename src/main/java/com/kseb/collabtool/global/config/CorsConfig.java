@@ -16,10 +16,11 @@ public class CorsConfig {
 
         config.setAllowCredentials(true); //쿠키, 세션 등 인증정보 포함 요청 허용
         config.setAllowedOrigins(List.of(  //허용할 도메인 지정
-                "http://localhost:3000"
-                //나중에 도매인 추가
+                "http://localhost:5173"
         ));
         //허용할 HTTP 메서드 지정
+        // 여기는 CORS 정책상 어떤 메서드를 허용할지 알려주는 것 뿐이지 OPTIONS를 허용하는게 아님
+        // 실제 제로 OPTIONS 메서드로 요청이 들어왔을 때이걸 차단할지, 허용할지를 결정하는 건 SecurityConfig
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         //허용할 HTTP 헤더 지정
         config.setAllowedHeaders(List.of("*"));
