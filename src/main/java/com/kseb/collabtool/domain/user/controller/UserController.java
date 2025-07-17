@@ -22,9 +22,9 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<UserResponse> patchUserInfo(
             @RequestBody UserUpdateRequest dto,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        User user=userDetails.getUser();
+        User user=currentUser.getUser();
         UserResponse result = userService.patchUser(user.getId(), dto);
         return ResponseEntity.ok(result);
     }
@@ -33,10 +33,19 @@ public class UserController {
     @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> patchProfileImage(
             @RequestPart("profileImg") MultipartFile profileImg,
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        User user=userDetails.getUser();
+        User user=currentUser.getUser();
         UserResponse result = userService.updateProfileImage(user.getId(), profileImg);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/api/users/me/profile-image")
+    public ResponseEntity<UserResponse> deleteProfileImage(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        User user=currentUser.getUser();
+        UserResponse result = userService.deleteProfileImage(user.getId());
         return ResponseEntity.ok(result);
     }
 }

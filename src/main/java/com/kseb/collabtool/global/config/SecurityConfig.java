@@ -59,7 +59,8 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/ws-stomp"
+                                "/ws-stomp",
+                                "/profile-images/**" //정적 프로필 이미지 접근 허용
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
