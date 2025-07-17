@@ -46,6 +46,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    //유저 이름 변경
     @Transactional
     public UserResponse patchUser(Long userId, UserUpdateRequest dto) {
         User user = userRepository.findById(userId)
@@ -56,6 +57,7 @@ public class UserService {
         return UserResponse.from(user);
     }
 
+    //프로필 변경
     @Transactional
     public UserResponse updateProfileImage(Long userId, MultipartFile profileImg) {
         User user = userRepository.findById(userId)
@@ -74,6 +76,31 @@ public class UserService {
         user.setProfileImg(filePathUtil.getProfileImageUrl(imageFileName));
         return UserResponse.from(user);
     }
+    //프로필 삭제 -> 삭제 시 기존 프로필로 변경
+    @Transactional
+    public UserResponse deleteProfileImage(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
 
+        String currentImgUrl = user.getProfileImg();
+        String defaultImgUrl = filePathUtil.getProfileImageUrl("default-profile.png");
+
+        // 실제 파일 삭제 (기본이미지 아닐 때만)
+        if (currentImgUrl != null && !currentImgUrl.equals(defaultImgUrl)) {
+            try {
+                // 파일명 추출
+                String fileName = currentImgUrl.substring(currentImgUrl.lastIndexOf("/") + 1);
+                Path filePath = Paths.get(filePathUtil.getProfileImagePath(fileName));
+                Files.deleteIfExists(filePath); // 없으면 패스
+            } catch (Exception e) {
+                throw new GeneralException(Status.FILE_DELETE_FAILED);
+            }
+        }
+
+        //기본이미지 URL로 변경
+        user.setProfileImg(defaultImgUrl);
+
+        return UserResponse.from(user);
+    }
 
 }
