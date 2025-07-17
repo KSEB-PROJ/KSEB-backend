@@ -33,10 +33,12 @@ public class ChannelService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
 
-        //리더만 채널 생성 가능하도록
-        if (!group.getOwner().getId().equals(userId)) {
-            throw new GeneralException(Status.CHANNEL_CREATE_ONLY_LEADER);
+        // [수정] 그룹 멤버인지 확인하여 채널 생성 권한 부여
+        boolean isMember = groupMemberRepository.existsByGroupIdAndUserId(groupId, userId);
+        if (!isMember) {
+            throw new GeneralException(Status.FORBIDDEN, "그룹 멤버만 채널을 생성할 수 있습니다.");
         }
+
         //존재하는 채널 타입 유형인지 체크
         ChannelType channelType = channelTypeRepository.findById(request.getChannelTypeId())
                 .orElseThrow(() -> new GeneralException(Status.CHANNEL_TYPE_NOT_FOUND));
@@ -113,10 +115,10 @@ public class ChannelService {
             throw new GeneralException(Status.CHANNEL_DELETE_ONLY_LEADER);
         }
 
-        /*//시스템 채널(공지/캘린더) 삭제 제한
+        // [수정] 시스템 채널(공지/캘린더) 삭제 제한 로직 주석 해제
         if (channel.getIsSystem()) {
             throw new GeneralException(Status.CHANNEL_SYSTEM_DELETE_FORBIDDEN);
-        }*/
+        }
 
         //삭제
         channelRepository.delete(channel);
