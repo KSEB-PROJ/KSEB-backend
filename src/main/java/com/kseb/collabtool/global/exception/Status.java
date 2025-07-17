@@ -28,6 +28,9 @@ public enum Status {
     MEMBER_ALREADY_JOINED(HttpStatus.CONFLICT, "member.already_joined", "이미 그룹에 가입된 사용자입니다."),
     MEMBER_ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "member.role_not_found", "멤버 역할 정보를 찾을 수 없습니다."),
 
+
+    //=== 파일 ===
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "file.upload_failed", "파일 저장에 실패했습니다."),
     // ==== 그룹 ====
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "group.not_found", "그룹을 찾을 수 없습니다."),
     INVALID_INVITE_CODE(HttpStatus.BAD_REQUEST, "group.invalid_invite_code", "유효하지 않은 초대코드입니다."),
