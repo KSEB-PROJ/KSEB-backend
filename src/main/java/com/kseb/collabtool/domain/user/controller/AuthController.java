@@ -43,6 +43,8 @@ public class AuthController {
         Authentication auth = authenticationManager.authenticate(token);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
+        httpRequest.getSession(true);
+
         return ResponseEntity.ok(ApiResponse.onSuccess("로그인 성공"));
     }
 }
