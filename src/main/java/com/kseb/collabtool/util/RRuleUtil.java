@@ -1,4 +1,4 @@
-package com.kseb.collabtool.domain.groups.util;
+package com.kseb.collabtool.util;
 
 import lombok.NoArgsConstructor;
 
