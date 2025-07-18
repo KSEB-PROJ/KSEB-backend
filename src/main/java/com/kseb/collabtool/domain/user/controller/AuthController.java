@@ -47,6 +47,8 @@ public class AuthController {
         HttpSession session = httpRequest.getSession(true); // true: 세션이 없으면 새로 생성
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
 
+        httpRequest.getSession(true);
+
         return ResponseEntity.ok(ApiResponse.onSuccess("로그인 성공"));
     }
 }
