@@ -1,9 +1,8 @@
 package com.kseb.collabtool.global.validation;
 
-import com.kseb.collabtool.domain.groups.util.RRuleUtil;
+import com.kseb.collabtool.util.RRuleUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import net.fortuna.ical4j.model.Recur;
 
 public class RRuleValidator implements ConstraintValidator<ValidRRule, String> {
 

@@ -36,3 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
+###프로필 이미지###
+/uploads/
+profile-images/
+*.png
+*.jpg
+*.jpeg
+*.gif
