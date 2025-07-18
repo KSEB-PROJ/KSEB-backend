@@ -1,6 +1,8 @@
 package com.kseb.collabtool.domain.message.service;
 
 import com.kseb.collabtool.domain.channel.entity.Channel;
+import com.kseb.collabtool.domain.filemeta.entity.FileEntity;
+import com.kseb.collabtool.domain.filemeta.repository.FileRepository;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
 import com.kseb.collabtool.domain.channel.repository.ChannelRepository;
@@ -15,11 +17,15 @@ import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import com.kseb.collabtool.global.exception.GeneralException;
 import com.kseb.collabtool.global.exception.Status;
+import com.kseb.collabtool.domain.filemeta.service.FileUtil; // 유틸 import
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,28 +37,63 @@ public class MessageService {
     private final MessageTypeRepository messageTypeRepository;
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
+    private final FileRepository fileRepository;
 
     @Transactional
-    public ChatResponse sendMessage(Long userId, ChatRequest request) {
+    public ChatResponse sendMessage(Long userId, ChatRequest request, MultipartFile file) {
         Channel channel = channelRepository.findById(request.getChannelId())
-                .orElseThrow(() -> new IllegalArgumentException("채널이 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(Status.CHANNEL_NOT_FOUND));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
         MessageType messageType = messageTypeRepository.findById(request.getMessageTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("메시지 타입이 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(Status.BAD_REQUEST));
 
         Message message = new Message();
         message.setChannel(channel);
         message.setUser(user);
         message.setContent(request.getContent());
         message.setMessageType(messageType);
-        message.setFileUrl(request.getFileUrl());
-        message.setFileName(request.getFileName());
+
+        // 파일 처리
+        if (file != null && !file.isEmpty()) {
+            try {
+                String fileUrl = FileUtil.saveFile(file);
+
+                // ===[ 파일 메타 DB 저장! ]===
+                FileEntity fileEntity = new FileEntity();
+                fileEntity.setChannel(channel);
+                fileEntity.setUser(user);
+                fileEntity.setFileUrl(fileUrl);
+                fileEntity.setFileName(file.getOriginalFilename());
+                fileEntity.setFileType(getFileExt(file.getOriginalFilename()));
+                fileEntity.setMimeType(file.getContentType());
+                fileEntity.setFileSize(file.getSize());
+                fileRepository.save(fileEntity);
+                // =========================
+
+                // 메시지 테이블에도 파일 정보 저장
+                message.setFileUrl(fileUrl);
+                message.setFileName(file.getOriginalFilename());
+            } catch (Exception e) {
+                throw new GeneralException(Status.INTERNAL_SERVER_ERROR, "파일 저장 실패");
+            }
+        } else {
+            message.setFileUrl(null);
+            message.setFileName(null);
+        }
 
         Message saved = messageRepository.save(message);
 
         return toResponse(saved, userId);
     }
+
+    // 파일 확장자 추출 함수
+    private String getFileExt(String fileName) {
+        if (fileName == null || !fileName.contains(".")) return "";
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
+    }
+
+    // 나머지 메서드는 기존 그대로 유지
 
     @Transactional(readOnly = true)
     public List<ChatResponse> getMessages(Long channelId, Long currentUserId) {
@@ -65,17 +106,16 @@ public class MessageService {
     @Transactional
     public ChatResponse updateMessage(Long userId, Long messageId, ChatRequest request) {
         Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
         if (!message.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("본인이 작성한 메시지만 수정할 수 있습니다.");
+            throw new GeneralException(Status.FORBIDDEN);
         }
         if (request.getContent() != null) message.setContent(request.getContent());
         if (request.getFileUrl() != null) message.setFileUrl(request.getFileUrl());
         if (request.getFileName() != null) message.setFileName(request.getFileName());
-        // 메시지 타입 변경은 필요시만 허용
         if (request.getMessageTypeId() != null) {
             MessageType messageType = messageTypeRepository.findById(request.getMessageTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("메시지 타입이 존재하지 않습니다."));
+                    .orElseThrow(() -> new GeneralException(Status.BAD_REQUEST));
             message.setMessageType(messageType);
         }
         return toResponse(message, userId);
@@ -83,26 +123,16 @@ public class MessageService {
 
     @Transactional
     public NoticeResponse promoteMessageToNotice(
-            Long channelId,
-            Long messageId,
-            Long userId,
-            LocalDateTime pinnedUntil // 추가!
+            Long channelId, Long messageId, Long userId, LocalDateTime pinnedUntil
     ) {
-        // 메시지 조회
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
-
-        // 채널 체크
         if (!message.getChannel().getId().equals(channelId)) {
-            throw new GeneralException(Status.BAD_REQUEST); // 필요시 별도의 Status 추가 가능
+            throw new GeneralException(Status.BAD_REQUEST);
         }
-
-        // 작성자(로그인 유저)와 메시지 작성자 일치 체크
         if (!message.getUser().getId().equals(userId)) {
-            throw new GeneralException(Status.FORBIDDEN); // 본인만 승격 가능
+            throw new GeneralException(Status.FORBIDDEN);
         }
-
-        // 공지 생성
         Notice notice = new Notice();
         notice.setGroup(message.getChannel().getGroup());
         notice.setChannel(message.getChannel());
@@ -114,19 +144,31 @@ public class MessageService {
 
         Notice saved = noticeRepository.save(notice);
 
-        // NoticeResponse로 변환해서 리턴
         return NoticeResponse.fromEntity(saved);
     }
-
 
     @Transactional
     public void deleteMessage(Long userId, Long messageId) {
         Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("메시지가 존재하지 않습니다."));
+                .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
         if (!message.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("본인이 작성한 메시지만 삭제할 수 있습니다.");
+            throw new GeneralException(Status.FORBIDDEN);
         }
-        message.setDeleted(true);
+
+        // 1. 파일 정보 삭제 (DB/폴더 동시)
+        if (message.getFileUrl() != null) {
+            // 1-1. 파일 DB에 저장된 fileUrl로 파일엔터티 조회 (예시)
+            Optional<FileEntity> fileOpt = fileRepository.findByFileUrl(message.getFileUrl());
+            fileOpt.ifPresent(file -> {
+                // 실제 파일 삭제
+                FileUtil.deleteFile(file.getFileUrl());
+                // 파일 엔터티 삭제
+                fileRepository.delete(file);
+            });
+        }
+
+        // 2. 메시지 소프트 삭제 또는 완전 삭제
+        messageRepository.delete(message);
     }
 
     private ChatResponse toResponse(Message message, Long currentUserId) {
@@ -144,6 +186,3 @@ public class MessageService {
                 .build();
     }
 }
-
-
-
