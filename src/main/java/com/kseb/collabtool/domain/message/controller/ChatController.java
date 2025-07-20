@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
 import com.kseb.collabtool.domain.message.service.MessageService;
-import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
 import com.kseb.collabtool.domain.notice.dto.NoticePromoteRequest;
+import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
+import com.kseb.collabtool.global.security.CustomUserDetails; // [수정] CustomUserDetails 임포트
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal; // [수정] AuthenticationPrincipal 임포트
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -28,9 +29,9 @@ public class ChatController {
             @PathVariable Long channelId,
             @RequestPart("message") String messageJson, // String으로 받음!
             @RequestPart(value = "file", required = false) MultipartFile file,
-            Principal principal
+            @AuthenticationPrincipal CustomUserDetails currentUser // [수정] Principal 대신 @AuthenticationPrincipal 사용 밑에 다른 api도 전부 다 이거로 수정
     ) throws Exception {
-        Long userId = Long.parseLong(principal.getName());
+        Long userId = currentUser.getUser().getId(); // [수정] 사용자 ID를 안전하게 가져옴 밑에 다른 api도 전부 다 이거로 수정
         // JSON String을 DTO로 변환
         ChatRequest request = objectMapper.readValue(messageJson, ChatRequest.class);
         request.setChannelId(channelId);
@@ -42,9 +43,9 @@ public class ChatController {
     @GetMapping
     public ResponseEntity<List<ChatResponse>> getMessages(
             @PathVariable Long channelId,
-            Principal principal
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        Long userId = Long.parseLong(principal.getName());
+        Long userId = currentUser.getUser().getId();
         List<ChatResponse> responses = messageService.getMessages(channelId, userId);
         return ResponseEntity.ok(responses);
     }
@@ -54,9 +55,9 @@ public class ChatController {
             @PathVariable Long channelId,
             @PathVariable Long messageId,
             @RequestBody ChatRequest request,
-            Principal principal
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        Long userId = Long.parseLong(principal.getName());
+        Long userId = currentUser.getUser().getId();
         request.setChannelId(channelId);
         ChatResponse response = messageService.updateMessage(userId, messageId, request);
         return ResponseEntity.ok(response);
@@ -66,9 +67,9 @@ public class ChatController {
     public ResponseEntity<Void> deleteMessage(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
-            Principal principal
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        Long userId = Long.parseLong(principal.getName());
+        Long userId = currentUser.getUser().getId();
         messageService.deleteMessage(userId, messageId);
         return ResponseEntity.ok().build();
     }
@@ -78,9 +79,9 @@ public class ChatController {
             @PathVariable Long channelId,
             @PathVariable Long messageId,
             @RequestBody NoticePromoteRequest request,
-            Principal principal
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        Long userId = Long.parseLong(principal.getName());
+        Long userId = currentUser.getUser().getId();
         NoticeResponse response = messageService.promoteMessageToNotice(
                 channelId, messageId, userId, request.getPinnedUntil()
         );
