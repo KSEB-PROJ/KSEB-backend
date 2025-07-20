@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/ws-stomp/**",
-                                "/profile-images/**" //정적 프로필 이미지 접근 허용
+                                "/profile-images/**", //정적 프로필 이미지 접근 허용
+                                "/chat-files/**"      // 채팅 파일 경로 허용
                         ).permitAll()
                         // 그 외 모든 요청은 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
@@ -58,9 +59,8 @@ public class SecurityConfig {
                 // 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout") // 로그아웃 URL 지정
-                        .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(HttpServletResponse.SC_OK))
                         .deleteCookies("JSESSIONID") // JSESSIONID 쿠키 삭제
                         .invalidateHttpSession(true) // 세션 무효화
                 );
