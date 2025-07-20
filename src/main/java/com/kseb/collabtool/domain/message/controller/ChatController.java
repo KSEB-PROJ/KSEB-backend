@@ -25,18 +25,21 @@ public class ChatController {
 
     // 메시지 + 파일 전송
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<ChatResponse> sendMessage(
+    public ResponseEntity<List<ChatResponse>> sendMessage(
+            //파일 다중 업로드를 위해 CHAT 부분 전부 수정합니당
+            // 반환 타입을 List<ChatResponse>로
             @PathVariable Long channelId,
-            @RequestPart("message") String messageJson, // String으로 받음!
-            @RequestPart(value = "file", required = false) MultipartFile file,
-            @AuthenticationPrincipal CustomUserDetails currentUser // [수정] Principal 대신 @AuthenticationPrincipal 사용 밑에 다른 api도 전부 다 이거로 수정
+            @RequestPart("message") String messageJson,
+            // 단일 파일(file) 대신 여러 파일(files)을 리스트로 받음
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) throws Exception {
-        Long userId = currentUser.getUser().getId(); // [수정] 사용자 ID를 안전하게 가져옴 밑에 다른 api도 전부 다 이거로 수정
-        // JSON String을 DTO로 변환
+        Long userId = currentUser.getUser().getId();
         ChatRequest request = objectMapper.readValue(messageJson, ChatRequest.class);
         request.setChannelId(channelId);
-        ChatResponse response = messageService.sendMessage(userId, request, file);
-        return ResponseEntity.ok(response);
+        // files 리스트를 서비스로 전달하고, 여러 개의 응답을 받을 수 있도록 수정
+        List<ChatResponse> responses = messageService.sendMessage(userId, request, files);
+        return ResponseEntity.ok(responses);
     }
 
     // 나머지 API 동일 (body로 받아도 됨)
