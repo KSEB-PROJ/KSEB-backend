@@ -234,6 +234,7 @@ public class MessageService {
                 .channelId(message.getChannel().getId())
                 .userId(message.getUser().getId())
                 .userName(message.getUser().getName())
+                .profileImgUrl(message.getUser().getProfileImg()) // 프로필 이미지 URL 추가
                 .content(message.getContent())
                 .messageType(message.getMessageType().getCode())
                 .fileUrl(message.getFileUrl())
