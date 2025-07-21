@@ -59,7 +59,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @PatchMapping("/api/users/me/password")
+    @PatchMapping("/me/password")
     public ResponseEntity<Void> changePassword(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestBody PasswordChangeRequest request
