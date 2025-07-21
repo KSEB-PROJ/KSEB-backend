@@ -1,5 +1,6 @@
 package com.kseb.collabtool.domain.user.controller;
 
+import com.kseb.collabtool.domain.user.dto.PasswordChangeRequest;
 import com.kseb.collabtool.domain.user.dto.UserResponse;
 import com.kseb.collabtool.domain.user.dto.UserUpdateRequest;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -13,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
 
 @RestController
-@RequestMapping("/api/uesrs")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -30,7 +31,7 @@ public class UserController {
     }
 
 
-    @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> patchProfileImage(
             @RequestPart("profileImg") MultipartFile profileImg,
             @AuthenticationPrincipal CustomUserDetails currentUser
@@ -40,12 +41,31 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("/api/users/me/profile-image")
+    @DeleteMapping("/me/profile-image")
     public ResponseEntity<UserResponse> deleteProfileImage(
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         User user=currentUser.getUser();
         UserResponse result = userService.deleteProfileImage(user.getId());
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        User user=currentUser.getUser();
+        UserResponse result = userService.getCurrentUser(user.getId());
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("/api/users/me/password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @RequestBody PasswordChangeRequest request
+    ) {
+        User user=currentUser.getUser();
+        userService.changePassword(user.getId(), request);
+        return ResponseEntity.ok().build(); // 성공시 200 OK만
     }
 }

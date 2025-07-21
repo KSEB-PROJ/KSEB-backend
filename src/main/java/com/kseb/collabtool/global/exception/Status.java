@@ -21,6 +21,7 @@ public enum Status {
 
     // ===로그인 부분===
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "auth.login_failed", "로그인 실패: 아이디 또는 비밀번호가 틀렸습니다."),
+    USER_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "user.password_mismatch", "현재 비밀번호가 일치하지 않습니다."),
 
     // ==== 유저/멤버 ====
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "user.not_found", "사용자를 찾을 수 없습니다."),
