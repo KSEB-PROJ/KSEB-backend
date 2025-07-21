@@ -14,11 +14,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${file.chat-file-folder}")
     private String chatFileFolder;
 
+    @Value("${file.profile-image-url-prefix}")
+    private String profileImageUrlPrefix;
+
+    @Value("${file.profile-image-folder}")
+    private String profileImageFolder;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // /profile-images/** URL을 실제 폴더와 연결
-        registry.addResourceHandler("/profile-images/**")
-                .addResourceLocations("file:src/main/resources/static/profile-images/");
+        // 프로필 이미지 URL과 실제 폴더 연결
+        registry.addResourceHandler(profileImageUrlPrefix + "**")
+                .addResourceLocations("file:" + profileImageFolder);
 
         // 채팅 파일 URL과 실제 폴더 연결
         registry.addResourceHandler(chatFileUrlPrefix + "**")

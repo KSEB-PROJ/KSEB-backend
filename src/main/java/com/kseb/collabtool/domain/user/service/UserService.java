@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,61 +46,87 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    //유저 이름 변경
+    /**
+     * 사용자 이름과 프로필 이미지를 함께 수정
+     *
+     * @param userId     현재 사용자 ID
+     * @param dto        변경할 이름 정보
+     * @param profileImg 변경할 프로필 이미지 파일
+     * @return UserResponse 업데이트된 사용자 정보
+     */
     @Transactional
-    public UserResponse patchUser(Long userId, UserUpdateRequest dto) {
+    public UserResponse patchUser(Long userId, UserUpdateRequest dto, MultipartFile profileImg) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
-        if (dto.getName() != null) {
+
+        // 1. 이름 변경 (dto가 null이 아니고, 이름이 실제로 존재할 때)
+        if (dto != null && dto.getName() != null && !dto.getName().isEmpty()) {
             user.setName(dto.getName());
         }
-        return UserResponse.fromEntity(user);
-    }
 
-    //프로필 변경
-    @Transactional
-    public UserResponse updateProfileImage(Long userId, MultipartFile profileImg) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
-        String imageFileName = UUID.randomUUID() + "_" + profileImg.getOriginalFilename();
+        // 2. 프로필 이미지 변경 (profileImg가 null이 아니고 비어있지 않을 때)
+        if (profileImg != null && !profileImg.isEmpty()) {
+            deleteProfileImageFile(user); // 기존 이미지 파일 삭제
 
-        Path imageFilePath = Paths.get(filePathUtil.getProfileImagePath(imageFileName));
+            try {
+                String imageFileName = UUID.randomUUID() + "_" + profileImg.getOriginalFilename();
 
-        try {
-            Files.write(imageFilePath, profileImg.getBytes());
-        } catch (Exception e) {
-            throw new GeneralException(Status.FILE_UPLOAD_FAILED);
-            //throw new RuntimeException("파일 저장 실패", e);
+                // 1. 설정 파일에 명시된 폴더 경로를 가져옵니다. (예: "uploads/profile-images/")
+                String uploadFolderPath = filePathUtil.getProfileImagePath("");
+
+                // 2. Path 객체를 생성합니다.
+                Path uploadPath = Paths.get(uploadFolderPath);
+
+                // 3. (핵심) 디렉토리가 존재하지 않으면 생성합니다.
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                // 4. 최종 파일 경로를 결정하고 파일을 저장합니다.
+                Path imageFilePath = uploadPath.resolve(imageFileName);
+                Files.write(imageFilePath, profileImg.getBytes());
+
+                user.setProfileImg(filePathUtil.getProfileImageUrl(imageFileName));
+
+            } catch (IOException e) {
+                // 파일 저장 중 I/O 예외 발생 시, 구체적인 에러 메시지와 함께 예외를 던집니다.
+                throw new GeneralException(Status.FILE_UPLOAD_FAILED, "파일 저장에 실패했습니다. 서버 경로 및 권한을 확인해주세요.");
+            }
         }
 
-        user.setProfileImg(filePathUtil.getProfileImageUrl(imageFileName));
         return UserResponse.fromEntity(user);
     }
-    //프로필 삭제 -> 삭제 시 기존 프로필로 변경
+
+
     @Transactional
     public UserResponse deleteProfileImage(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
 
-        String currentImgUrl = user.getProfileImg();
+        // 실제 파일 삭제
+        deleteProfileImageFile(user);
+
+        // DB에서는 기본 이미지 URL로 변경
         String defaultImgUrl = filePathUtil.getProfileImageUrl("default-profile.png");
-
-        // 실제 파일 삭제 (기본이미지 아닐 때만)
-        if (currentImgUrl != null && !currentImgUrl.equals(defaultImgUrl)) {
-            try {
-                // 파일명 추출
-                String fileName = currentImgUrl.substring(currentImgUrl.lastIndexOf("/") + 1);
-                Path filePath = Paths.get(filePathUtil.getProfileImagePath(fileName));
-                Files.deleteIfExists(filePath); // 없으면 패스
-            } catch (Exception e) {
-                throw new GeneralException(Status.FILE_DELETE_FAILED);
-            }
-        }
-
-        //기본이미지 URL로 변경
         user.setProfileImg(defaultImgUrl);
 
         return UserResponse.fromEntity(user);
+    }
+
+    // (Helper Method) 실제 이미지 파일을 삭제.
+    private void deleteProfileImageFile(User user) {
+        String currentImgUrl = user.getProfileImg();
+        String defaultImgUrl = filePathUtil.getProfileImageUrl("default-profile.png");
+
+        if (currentImgUrl != null && !currentImgUrl.equals(defaultImgUrl)) {
+            try {
+                String fileName = currentImgUrl.substring(currentImgUrl.lastIndexOf("/") + 1);
+                Path filePath = Paths.get(filePathUtil.getProfileImagePath(fileName));
+                Files.deleteIfExists(filePath);
+            } catch (Exception e) {
+                System.err.println("Failed to delete profile image file: " + e.getMessage());
+            }
+        }
     }
 
     //유저 모든 정보를 조회함
