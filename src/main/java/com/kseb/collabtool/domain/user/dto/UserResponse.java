@@ -15,7 +15,7 @@ public class UserResponse {
     private String profileImg;
 
 
-    public static UserResponse from(User user) {
+    public static UserResponse fromEntity(User user) {
         UserResponse dto = new UserResponse();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
