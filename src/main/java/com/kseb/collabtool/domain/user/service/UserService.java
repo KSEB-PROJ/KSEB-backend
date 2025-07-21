@@ -1,5 +1,6 @@
 package com.kseb.collabtool.domain.user.service;
 
+import com.kseb.collabtool.domain.user.dto.PasswordChangeRequest;
 import com.kseb.collabtool.domain.user.dto.UserResponse;
 import com.kseb.collabtool.domain.user.dto.UserUpdateRequest;
 import com.kseb.collabtool.domain.user.entity.User;
@@ -9,7 +10,6 @@ import com.kseb.collabtool.global.exception.Status;
 import com.kseb.collabtool.util.FilePathUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -54,7 +53,7 @@ public class UserService {
         if (dto.getName() != null) {
             user.setName(dto.getName());
         }
-        return UserResponse.from(user);
+        return UserResponse.fromEntity(user);
     }
 
     //프로필 변경
@@ -74,7 +73,7 @@ public class UserService {
         }
 
         user.setProfileImg(filePathUtil.getProfileImageUrl(imageFileName));
-        return UserResponse.from(user);
+        return UserResponse.fromEntity(user);
     }
     //프로필 삭제 -> 삭제 시 기존 프로필로 변경
     @Transactional
@@ -100,7 +99,29 @@ public class UserService {
         //기본이미지 URL로 변경
         user.setProfileImg(defaultImgUrl);
 
-        return UserResponse.from(user);
+        return UserResponse.fromEntity(user);
     }
 
+    //유저 모든 정보를 조회함
+    @Transactional
+    public UserResponse getCurrentUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
+        return UserResponse.fromEntity(user);
+    }
+
+    //유저 비밀번호 변경
+    @Transactional
+    public void changePassword(Long userId, PasswordChangeRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
+
+        // 현재 비밀번호 검증
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new GeneralException(Status.USER_PASSWORD_MISMATCH); //"현재 비밀번호가 일치하지 않습니다."
+        }
+
+        // 새 비밀번호 암호화 및 저장
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    }
 }
