@@ -15,12 +15,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/groups/{groupId}")
+@RequestMapping("/api/groups/{groupId}/channels")
 public class ChannelController {
 
     private final ChannelService channelService;
 
-    @PostMapping("/channels")
+    @PostMapping
     public ResponseEntity<ChannelResponse> createChannel(
             @PathVariable Long groupId,
             @AuthenticationPrincipal CustomUserDetails currentUser,
@@ -31,7 +31,7 @@ public class ChannelController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/channels")
+    @GetMapping
     public ResponseEntity<List<ChannelListDto>> getChannels(
             @PathVariable Long groupId,
             @AuthenticationPrincipal CustomUserDetails currentUser
