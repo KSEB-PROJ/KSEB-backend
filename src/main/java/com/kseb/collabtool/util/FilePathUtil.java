@@ -11,6 +11,13 @@ public class FilePathUtil {
     @Value("${file.profile-image-url-prefix}")
     private String profileImageUrlPrefix;
 
+    @Value("${file.chat-file-folder}")
+    private String chatFileFolder;
+
+    @Value("${file.chat-file-url-prefix}")
+    private String chatFileUrlPrefix;
+
+
     // 저장할 실제 서버 파일 경로
     public String getProfileImagePath(String fileName) {
         // 항상 /로 끝나게 처리
@@ -26,5 +33,21 @@ public class FilePathUtil {
             return profileImageUrlPrefix + "/" + fileName;
         }
         return profileImageUrlPrefix + fileName;
+    }
+
+    // 채팅 파일 저장 경로
+    public String getChatFilePath(String fileName) {
+        if (!chatFileFolder.endsWith("/")) {
+            return chatFileFolder + "/" + fileName;
+        }
+        return chatFileFolder + fileName;
+    }
+
+    // 채팅 파일 접근 URL
+    public String getChatFileUrl(String fileName) {
+        if (!chatFileUrlPrefix.endsWith("/")) {
+            return chatFileUrlPrefix + "/" + fileName;
+        }
+        return chatFileUrlPrefix + fileName;
     }
 }
