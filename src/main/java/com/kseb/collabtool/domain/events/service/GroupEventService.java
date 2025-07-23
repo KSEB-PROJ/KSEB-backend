@@ -128,6 +128,7 @@ public class GroupEventService {
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND, "참여 기록이 없습니다."));
         participant.setStatus(newStatus);
     }
+
     @Transactional
     public void updateGroupEvent(Long groupId, Long eventId, Long userId, EventUpdateRequest dto) {
         Event event = eventRepository.findById(eventId)
