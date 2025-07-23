@@ -70,7 +70,7 @@ public class GroupEventService {
             EventParticipant participant = new EventParticipant();
             participant.setEvent(groupEvent);
             participant.setUser(member);
-            participant.setStatus(ParticipantStatus.ACCEPTED);
+            participant.setStatus(ParticipantStatus.TENTATIVE);
             participant.setId(new EventParticipantId(groupEvent.getId(), member.getId()));
             groupEvent.getParticipants().add(participant);
         }
