@@ -1,13 +1,12 @@
 package com.kseb.collabtool.global.config;
 
-import com.kseb.collabtool.domain.user.service.CustomUserDetailsService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.kseb.collabtool.global.security.JwtAuthenticationFilter;
+import com.kseb.collabtool.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,14 +15,19 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    // ObjectMapper 의존성 주입은 이제 필요 없습니다.
+
+    private final JwtTokenProvider jwtTokenProvider;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
+
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -37,9 +41,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-                .cors(Customizer.withDefaults())       // CORS 설정 적용
+                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // CORS 설정 적용
                 .httpBasic(AbstractHttpConfigurer::disable) // Http Basic 인증 비활성화
                 .formLogin(AbstractHttpConfigurer::disable) // Form 로그인 비활성화
+
+                // JWT를 사용하기 때문에 세션을 STATELESS로 설정
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 // 요청별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // Preflight 요청은 모두 허용
@@ -56,14 +64,10 @@ public class SecurityConfig {
                         // 그 외 모든 요청은 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
-                // 로그아웃 설정
-                .logout(logout -> logout
-                        .logoutUrl("/api/auth/logout") // 로그아웃 URL 지정
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpServletResponse.SC_OK))
-                        .deleteCookies("JSESSIONID") // JSESSIONID 쿠키 삭제
-                        .invalidateHttpSession(true) // 세션 무효화
-                );
+                // 직접 만든 JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 전에 추가
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
+        // .logout(...) 부분 삭제
 
         return http.build();
     }

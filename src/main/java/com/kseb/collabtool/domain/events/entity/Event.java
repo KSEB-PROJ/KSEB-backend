@@ -79,7 +79,7 @@ public class Event {
     @Column(name = "day_of_week")
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "theme_color", nullable = false, length = 7)
+    @Column(name = "theme_color", nullable = false, length = 30)
     private String themeColor;  // HEX 컬러코드 (#xxxxxx)
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
