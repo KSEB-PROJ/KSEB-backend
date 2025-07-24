@@ -27,7 +27,9 @@ public class EventResponse {
     private OwnerType ownerType;
     private Long ownerId;
     private String themeColor;
+
     private List<EventParticipantDto> participants;
+    private List<EventTaskResponse> tasks;
 
 
 
@@ -35,6 +37,12 @@ public class EventResponse {
         List<EventParticipantDto> participants = event.getParticipants().stream()
                 .map(EventParticipantDto::from)
                 .collect(Collectors.toList());
+
+        // 할 일 목록 DTO 변환
+        List<EventTaskResponse> tasks = event.getEventTasks().stream()
+                .map(EventTaskResponse::new)
+                .collect(Collectors.toList());
+
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
@@ -47,7 +55,8 @@ public class EventResponse {
                 event.getOwnerType(),
                 event.getOwnerId(),
                 event.getThemeColor(),
-                participants
+                participants,
+                tasks
         );
     }
 }

@@ -55,7 +55,7 @@ public class CourseTimetable {
     private LocalDateTime updatedAt;
 
     @Column(name = "theme_color", nullable = false, length = 7)
-    private String themeColor;  // HEX 컬러코드 (#xxxxxx)
+    private String themeColor;
 
     @PrePersist
     protected void onCreate() {
