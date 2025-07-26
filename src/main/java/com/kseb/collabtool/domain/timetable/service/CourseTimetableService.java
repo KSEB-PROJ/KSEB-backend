@@ -151,27 +151,39 @@ public class CourseTimetableService {
      */
     @Transactional
     public CourseTimetableDto patch(Long id, CourseTimetableDto dto, Long userId) {
-        // 1. 엔티티를 조회.
         CourseTimetable entity = courseTimetableRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new GeneralException(Status.TIMETABLE_NOT_FOUND));
 
-        //  연동된 Event를 찾기 위해 수정 전의 원본 데이터를 기록.
         String oldCourseName = entity.getCourseName();
         String oldCourseCode = entity.getCourseCode();
         String oldSemester = entity.getSemester();
         DayOfWeek oldDayOfWeek = entity.getDayOfWeek();
 
-        // 2. 시간 정보가 변경되었는지 확인.
         boolean isTimeChanged = !entity.getSemester().equals(dto.getSemester()) ||
                 !entity.getDayOfWeek().equals(dto.getDayOfWeek()) ||
                 !entity.getStartTime().equals(dto.getStartTime()) ||
                 !entity.getEndTime().equals(dto.getEndTime());
 
-        // 3. 시간이 변경되면, 다른 강의와 겹치는지 검사.
+        // [핵심 수정] 쿼리 대신 서비스 로직으로 겹침 확인
         if (isTimeChanged) {
-            boolean overlap = courseTimetableRepository.existsOverlap(
-                    userId, dto.getSemester(), dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime());
-            if(overlap) throw new GeneralException(Status.TIMETABLE_OVERLAP);
+            // 1. 해당 요일의 모든 강의를 DB에서 가져옴
+            List<CourseTimetable> coursesOnSameDay = courseTimetableRepository
+                    .findAllByUserIdAndSemesterAndDayOfWeek(userId, dto.getSemester(), dto.getDayOfWeek());
+
+            // 2. Java Stream을 사용하여 겹치는 시간이 있는지 확인
+            boolean isOverlapping = coursesOnSameDay.stream()
+                    // 2-1. 자기 자신은 검사 대상에서 제외
+                    .filter(course -> !course.getId().equals(id))
+                    // 2-2. 시간이 겹치는 강의가 하나라도 있는지 확인
+                    .anyMatch(course ->
+                            dto.getStartTime().isBefore(course.getEndTime()) &&
+                                    dto.getEndTime().isAfter(course.getStartTime())
+                    );
+
+            // 3. 겹치는 강의가 있으면 예외 발생
+            if (isOverlapping) {
+                throw new GeneralException(Status.TIMETABLE_OVERLAP);
+            }
         }
 
         // 4. 엔티티의 값 업데이트.

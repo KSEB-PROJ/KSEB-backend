@@ -20,6 +20,8 @@ public interface CourseTimetableRepository extends JpaRepository<CourseTimetable
                           @Param("dayOfWeek") DayOfWeek dayOfWeek,
                           @Param("startTime") LocalTime startTime,
                           @Param("endTime") LocalTime endTime);
+    // 서비스 로직에서 사용할 조회 메서드
+    List<CourseTimetable> findAllByUserIdAndSemesterAndDayOfWeek(Long userId, String semester, DayOfWeek dayOfWeek);
 
     List<CourseTimetable> findAllByUserIdAndSemester(Long userId, String semester);
     List<CourseTimetable> findAllByUserId(Long userId);
