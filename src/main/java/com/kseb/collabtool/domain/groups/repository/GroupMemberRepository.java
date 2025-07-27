@@ -11,13 +11,12 @@ import java.util.Optional;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember,Long> {
     @Query("SELECT new com.kseb.collabtool.domain.groups.dto.GroupListDto(" +
-            "g.id, g.name, g.code) " +
+            "g.id, g.name, g.code, g.themeColor) " +
             "FROM GroupMember m " +
             "JOIN m.group g " +
             "WHERE m.user.id = :userId " +
-            "GROUP BY g.id, g.name, g.code " +
+            "GROUP BY g.id, g.name, g.code, g.themeColor " +
             "ORDER BY g.id DESC")
-
     List<GroupListDto> findGroupsByUserId(@Param("userId") Long userId); //내가 속한 그룹들
 
     List<GroupMember> findByGroup_Id(Long groupId);

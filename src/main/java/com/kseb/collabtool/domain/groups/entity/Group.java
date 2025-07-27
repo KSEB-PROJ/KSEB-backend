@@ -39,6 +39,10 @@ public class Group {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    // 그룹 테마 색상을 저장할 컬럼
+    @Column(name = "theme_color", length = 30)
+    private String themeColor;
+
     //그룹 삭제 시 group_members, channels, events 등 연관 엔티티까지 같이 삭제
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<GroupMember> groupMembers;

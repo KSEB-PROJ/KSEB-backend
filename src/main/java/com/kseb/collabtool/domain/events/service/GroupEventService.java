@@ -55,6 +55,7 @@ public class GroupEventService {
         groupEvent.setEndDatetime(dto.getEndDatetime());
         groupEvent.setAllDay(dto.isAllDay());
         groupEvent.setRrule(dto.getRrule());
+        groupEvent.setThemeColor(dto.getThemeColor());
         groupEvent.setCreatedBy(creator);
         groupEvent.setUpdatedBy(creator);
         groupEvent.setCreatedAt(LocalDateTime.now());
@@ -69,7 +70,7 @@ public class GroupEventService {
             EventParticipant participant = new EventParticipant();
             participant.setEvent(groupEvent);
             participant.setUser(member);
-            participant.setStatus(ParticipantStatus.ACCEPTED);
+            participant.setStatus(ParticipantStatus.TENTATIVE);
             participant.setId(new EventParticipantId(groupEvent.getId(), member.getId()));
             groupEvent.getParticipants().add(participant);
         }
@@ -127,6 +128,7 @@ public class GroupEventService {
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND, "참여 기록이 없습니다."));
         participant.setStatus(newStatus);
     }
+
     @Transactional
     public void updateGroupEvent(Long groupId, Long eventId, Long userId, EventUpdateRequest dto) {
         Event event = eventRepository.findById(eventId)
@@ -145,6 +147,7 @@ public class GroupEventService {
         if (dto.getEndDatetime() != null) event.setEndDatetime(dto.getEndDatetime());
         if (dto.getAllDay() != null) event.setAllDay(dto.getAllDay());
         if (dto.getRrule() != null) event.setRrule(dto.getRrule());
+        if (dto.getThemeColor() != null) event.setThemeColor(dto.getThemeColor());
 
         User updater = userRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));

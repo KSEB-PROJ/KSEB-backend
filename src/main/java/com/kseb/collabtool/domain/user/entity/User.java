@@ -1,11 +1,14 @@
 package com.kseb.collabtool.domain.user.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import jdk.jshell.Snippet;
+import lombok.*;
 
 import java.time.LocalDateTime;
-
+@Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Table(name="users")
 public class User {

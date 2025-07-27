@@ -21,6 +21,7 @@ public enum Status {
 
     // ===로그인 부분===
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "auth.login_failed", "로그인 실패: 아이디 또는 비밀번호가 틀렸습니다."),
+    USER_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "user.password_mismatch", "현재 비밀번호가 일치하지 않습니다."),
 
     // ==== 유저/멤버 ====
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "user.not_found", "사용자를 찾을 수 없습니다."),
@@ -28,6 +29,9 @@ public enum Status {
     MEMBER_ALREADY_JOINED(HttpStatus.CONFLICT, "member.already_joined", "이미 그룹에 가입된 사용자입니다."),
     MEMBER_ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "member.role_not_found", "멤버 역할 정보를 찾을 수 없습니다."),
 
+
+    //=== 파일 ===
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "file.upload_failed", "파일 저장에 실패했습니다."),
     // ==== 그룹 ====
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "group.not_found", "그룹을 찾을 수 없습니다."),
     INVALID_INVITE_CODE(HttpStatus.BAD_REQUEST, "group.invalid_invite_code", "유효하지 않은 초대코드입니다."),
@@ -50,12 +54,24 @@ public enum Status {
 
     // ==== 파일 ====
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "file.not_found", "파일이 존재하지 않습니다."),
+    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "file.delete_failed", "파일 삭제에 실패했습니다."),
+    FILE_NOT_SAVE(HttpStatus.NOT_FOUND, "file.not_save", "파일을 저장할수  없습니다."),
 
     // ==== 인증/권한 ====
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "auth.invalid_password", "비밀번호가 올바르지 않습니다."),
     // ==== 공지 ====
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다.");
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "notice.not_found", "공지사항이 존재하지 않습니다."),
+    INVALID_PINNED_UNTIL(HttpStatus.BAD_REQUEST, "notice.invalid_pinned_until", "만료시간이 현재보다 이전일 수 없습니다."),
+    NOTICE_PROMOTE_ONLY_SELF(HttpStatus.FORBIDDEN, "notice.promote_only_self", "본인이 작성한 메시지만 공지로 승격할 수 있습니다."),
+    // ==== 스케쥴 ====
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "schedule.not_found", "일정이 존재하지 않습니다."),
 
+
+    // ==== 강의 시간표 ====
+    TIMETABLE_OVERLAP(HttpStatus.CONFLICT, "timetable.overlap", "겹치는 강의 시간표가 이미 존재합니다."),
+    TIMETABLE_NOT_FOUND(HttpStatus.NOT_FOUND, "timetable.not_found", "존재하지 않는 강의입니다."),
+    INVALID_SEMESTER_FORMAT(HttpStatus.BAD_REQUEST, "timetable.invalid_semester_format", "학기 형식 오류 "),
+    UNSUPPORTED_SEMESTER_CODE(HttpStatus.BAD_REQUEST, "timetable.unsupported_semester_code", "지원하지 않는 학기 코드 ");
     // ==== 기타 (필요시 추가) ====
     
 

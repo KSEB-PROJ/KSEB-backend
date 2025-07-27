@@ -15,6 +15,7 @@ public class GroupResponse {
     private String code;
     private Long ownerId;
     private String ownerName;
+    private String themeColor;
     private LocalDateTime createdAt;
 
     public static GroupResponse fromEntity(Group group) {
@@ -24,6 +25,7 @@ public class GroupResponse {
                 group.getCode(),
                 group.getOwner().getId(),
                 group.getOwner().getName(),
+                group.getThemeColor(),
                 group.getCreatedAt()
         );
     }

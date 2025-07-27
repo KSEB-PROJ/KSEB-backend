@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GroupCreateRequest {
     private String name;
+    private String themeColor;
     //private Long ownerId;
 }

@@ -1,11 +1,10 @@
 package com.kseb.collabtool.domain.filemeta.entity;
-
 import com.kseb.collabtool.domain.channel.entity.Channel;
 import com.kseb.collabtool.domain.user.entity.User;
 import jakarta.persistence.*;
-
+import lombok.*;
 import java.time.LocalDateTime;
-
+@Getter @Setter
 @Entity
 @Table(name = "files")
 public class FileEntity {

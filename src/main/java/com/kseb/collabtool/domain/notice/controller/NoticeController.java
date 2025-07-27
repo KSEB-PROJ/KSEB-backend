@@ -11,27 +11,27 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/groups/{groupId}/notices") // 기본 경로 추가
 public class NoticeController {
     private final NoticeService noticeService;
 
     // 공지 생성
-    @PostMapping("/groups/{groupId}/notices")
+    @PostMapping
     public NoticeResponse createNotice(
             @PathVariable Long groupId,
             @RequestBody NoticeCreateRequest req,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        User user = currentUser.getUser();
-        return noticeService.createNotice(groupId, req, user);
+        return noticeService.createNotice(groupId, req, currentUser.getUser());
     }
 
     // 공지 목록 조회
-    @GetMapping("/groups/{groupId}/notices")
+    @GetMapping
     public List<NoticeResponse> getNoticeList(@PathVariable Long groupId) {
         return noticeService.getNoticeList(groupId);
     }
 
     // 공지 상세 조회
-    @GetMapping("/groups/{groupId}/notices/{noticeId}")
+    @GetMapping("/{noticeId}")
     public NoticeResponse getNotice(
             @PathVariable Long groupId,
             @PathVariable Long noticeId) {
@@ -39,7 +39,7 @@ public class NoticeController {
     }
 
     // 공지 수정
-    @PatchMapping("/groups/{groupId}/notices/{noticeId}")
+    @PatchMapping("/{noticeId}")
     public NoticeResponse updateNotice(
             @PathVariable Long groupId,
             @PathVariable Long noticeId,
@@ -48,19 +48,13 @@ public class NoticeController {
     }
 
     // 공지 삭제
-    @DeleteMapping("/groups/{groupId}/notices/{noticeId}")
+    @DeleteMapping("/{noticeId}")
     public void deleteNotice(
             @PathVariable Long groupId,
             @PathVariable Long noticeId) {
         noticeService.deleteNotice(noticeId);
     }
 
-    // 공지 상단고정/해제
-    @PatchMapping("/groups/{groupId}/notices/{noticeId}/pin")
-    public NoticeResponse pinNotice(
-            @PathVariable Long groupId,
-            @PathVariable Long noticeId,
-            @RequestBody NoticePinRequest req) {
-        return noticeService.pinNotice(noticeId, req);
-    }
+
+
 }

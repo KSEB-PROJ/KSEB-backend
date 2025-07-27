@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
+import com.kseb.collabtool.domain.timetable.entity.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,5 +50,26 @@ public interface EventRepository extends JpaRepository<Event,Long> {
     @Transactional
     @Query("DELETE FROM Event e WHERE e.ownerType = :ownerType AND e.ownerId = :ownerId")
     void deleteByOwnerTypeAndOwnerId(@Param("ownerType") OwnerType ownerType, @Param("ownerId") Long ownerId);
+
+
+        @Query("SELECT e FROM Event e WHERE e.ownerId = :userId AND e.ownerType = :ownerType AND e.title = :title AND e.courseCode = :courseCode AND e.semester = :semester AND e.dayOfWeek = :dayOfWeek")
+        Event findCourseEvent(@Param("userId") Long userId,
+                              @Param("ownerType") OwnerType ownerType,
+                              @Param("title") String title,
+                              @Param("courseCode") String courseCode,
+                              @Param("semester") String semester,
+                              @Param("dayOfWeek") DayOfWeek dayOfWeek);
+
+        @Modifying
+        @Transactional
+        @Query("DELETE FROM Event e WHERE e.ownerId = :userId AND e.ownerType = :ownerType AND e.title = :title AND e.courseCode = :courseCode AND e.semester = :semester AND e.dayOfWeek = :dayOfWeek")
+        void deleteCourseEvent(@Param("userId") Long userId,
+                               @Param("ownerType") OwnerType ownerType,
+                               @Param("title") String title,
+                               @Param("courseCode") String courseCode,
+                               @Param("semester") String semester,
+                               @Param("dayOfWeek") DayOfWeek dayOfWeek);
+
 }
+
 
