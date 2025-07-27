@@ -43,3 +43,7 @@ profile-images/
 *.jpg
 *.jpeg
 *.gif
+
+### 시크릿 파일 ###
+.env
+.env.*.local
