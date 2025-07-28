@@ -6,10 +6,11 @@ import com.kseb.collabtool.domain.message.dto.ChatResponse;
 import com.kseb.collabtool.domain.message.service.MessageService;
 import com.kseb.collabtool.domain.notice.dto.NoticePromoteRequest;
 import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
-import com.kseb.collabtool.global.security.CustomUserDetails; // [수정] CustomUserDetails 임포트
+import com.kseb.collabtool.global.exception.ApiResponse;
+import com.kseb.collabtool.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // [수정] AuthenticationPrincipal 임포트
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,14 +18,17 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/channels/{channelId}/messages")
+// [수정] 공통 경로를 /api/channels/{channelId}로 통합
+@RequestMapping("/api/channels/{channelId}")
 public class ChatController {
 
     private final MessageService messageService;
     private final ObjectMapper objectMapper; // (자동 주입, bean 등록됨)
 
+    // --- 기존 API들 (경로 수정) ---
+
     // 메시지 + 파일 전송
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping(value = "/messages", consumes = "multipart/form-data")
     public ResponseEntity<List<ChatResponse>> sendMessage(
             //파일 다중 업로드를 위해 CHAT 부분 전부 수정합니당
             // 반환 타입을 List<ChatResponse>로
@@ -43,7 +47,7 @@ public class ChatController {
     }
 
     // 나머지 API 동일 (body로 받아도 됨)
-    @GetMapping
+    @GetMapping("/messages")
     public ResponseEntity<List<ChatResponse>> getMessages(
             @PathVariable Long channelId,
             @AuthenticationPrincipal CustomUserDetails currentUser
@@ -53,7 +57,7 @@ public class ChatController {
         return ResponseEntity.ok(responses);
     }
 
-    @PatchMapping("/{messageId}")
+    @PatchMapping("/messages/{messageId}")
     public ResponseEntity<ChatResponse> updateMessage(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
@@ -66,7 +70,7 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{messageId}")
+    @DeleteMapping("/messages/{messageId}")
     public ResponseEntity<Void> deleteMessage(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
@@ -77,7 +81,7 @@ public class ChatController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{messageId}/promote-notice")
+    @PostMapping("/messages/{messageId}/promote-notice")
     public ResponseEntity<NoticeResponse> promoteMessageToNotice(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
@@ -89,5 +93,22 @@ public class ChatController {
                 channelId, messageId, userId, request.getPinnedUntil()
         );
         return ResponseEntity.ok(response);
+    }
+
+
+    /**
+     * AI 챗봇 서버가 대화 요약 기능을 위해 채널의 전체 대화 내역을 조회하는 전용 API.
+     * @param channelId 조회할 채널의 ID
+     * @param userId    요청 헤더(X-User-ID)에 담겨있는 사용자 ID
+     * @return 성공 시, 메시지 목록을 `data` 필드에 담은 ApiResponse 객체
+     */
+    @GetMapping("/chats")
+    public ResponseEntity<ApiResponse<List<ChatResponse>>> getChannelChatHistoryForAi(
+            @PathVariable("channelId") Long channelId,
+            @RequestHeader("X-User-ID") Long userId) {
+
+        List<ChatResponse> messages = messageService.getMessagesForAiSummary(channelId, userId);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(messages));
     }
 }

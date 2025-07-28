@@ -13,6 +13,7 @@ import com.kseb.collabtool.domain.message.repository.MessageTypeRepository;
 import com.kseb.collabtool.domain.notice.dto.NoticeResponse;
 import com.kseb.collabtool.domain.notice.entity.Notice;
 import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
+import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import com.kseb.collabtool.global.exception.GeneralException;
@@ -45,6 +46,8 @@ public class MessageService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final FilePathUtil filePathUtil;
+
+    private final GroupMemberRepository groupMemberRepository;
 
     // 메세지 리스트로 변경
     @Transactional
@@ -227,7 +230,36 @@ public class MessageService {
         }
         messageRepository.delete(message);
     }
+    /**
+     * [신규 추가] AI 서버의 대화 요약 요청을 처리하기 위한 서비스 메소드입니다.
+     * 채널의 모든 메시지를 조회하며, 요청한 사용자의 채널 접근 권한을 검사합니다.
+     *
+     * @param channelId 조회할 채널의 ID
+     * @param userId    요청한 사용자의 ID (권한 확인용)
+     * @return ChatResponse DTO 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<ChatResponse> getMessagesForAiSummary(Long channelId, Long userId) {
+        // 1. 채널 정보 조회
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new GeneralException(Status.CHANNEL_NOT_FOUND));
 
+        // 2. 사용자가 해당 채널이 속한 그룹의 멤버인지 확인하여 접근 권한 검사
+        Long groupId = channel.getGroup().getId();
+        boolean isMember = groupMemberRepository.existsByGroupIdAndUserId(groupId, userId);
+        if (!isMember) {
+            // 권한이 없는 경우 접근 금지 예외 발생
+            throw new GeneralException(Status.FORBIDDEN, "해당 채널에 접근할 권한이 없습니다.");
+        }
+
+        // 3. 리포지토리를 통해 채널의 모든 메시지를 가져옵니다.
+        List<Message> messages = messageRepository.findByChannelIdAndDeletedFalseOrderByCreatedAtAsc(channelId);
+
+        // 4. 메시지 엔티티 리스트를 DTO 리스트로 변환하여 반환합니다.
+        return messages.stream()
+                .map(message -> toResponse(message, userId))
+                .collect(Collectors.toList());
+    }
     private ChatResponse toResponse(Message message, Long currentUserId) {
         return ChatResponse.builder()
                 .id(message.getId())
