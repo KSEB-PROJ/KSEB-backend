@@ -231,8 +231,8 @@ public class MessageService {
         messageRepository.delete(message);
     }
     /**
-     * [신규 추가] AI 서버의 대화 요약 요청을 처리하기 위한 서비스 메소드입니다.
-     * 채널의 모든 메시지를 조회하며, 요청한 사용자의 채널 접근 권한을 검사합니다.
+     * [신규 추가] AI 서버의 대화 요약 요청을 처리하기 위한 서비스 메소드.
+     * 채널의 모든 메시지를 조회하며, 요청한 사용자의 채널 접근 권한 검사.
      *
      * @param channelId 조회할 채널의 ID
      * @param userId    요청한 사용자의 ID (권한 확인용)

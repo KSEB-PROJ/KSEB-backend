@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * JWT 인증 필터.
  * HTTP 요청의 Authorization 헤더에서 JWT 토큰을 추출하고,
- * 유효성을 검사하여 SecurityContext에 인증 정보를 저장한다.
+ * 유효성을 검사하여 SecurityContext에 인증 정보 저장.
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * JWT 토큰의 유효성을 검사하고 인증 정보를 SecurityContext에 저장.
-     * 인증이 실패해도 예외를 던지지 않고, SecurityContext를 비운다.
+     * 인증이 실패해도 예외를 던지지 않고, SecurityContext를 비움.
      */
     @Override
     protected void doFilterInternal(
@@ -37,14 +37,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         try {
-            // 1. Request Header에서 토큰을 꺼냅니다.
+            // 1. Request Header에서 토큰을 꺼냄.
             String token = jwtTokenProvider.resolveToken(request);
 
             // 2. 토큰이 유효한지 확인합니다.
             if (token != null && jwtTokenProvider.validateToken(token)) {
-                // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 Authentication 객체를 생성합니다.
+                // 토큰이 유효하면 토큰으로부터 유저 정보를 받아와서 Authentication 객체 생성.
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                // SecurityContext 에 Authentication 객체를 저장합니다.
+                // SecurityContext 에 Authentication 객체 저장.
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
 
-        // 3. 다음 필터로 요청을 넘깁니다.
+        // 3. 다음 필터로 요청을 넘김.
         filterChain.doFilter(request, response);
     }
 }

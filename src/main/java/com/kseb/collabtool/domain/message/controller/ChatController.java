@@ -99,14 +99,15 @@ public class ChatController {
     /**
      * AI 챗봇 서버가 대화 요약 기능을 위해 채널의 전체 대화 내역을 조회하는 전용 API.
      * @param channelId 조회할 채널의 ID
-     * @param userId    요청 헤더(X-User-ID)에 담겨있는 사용자 ID
+     * @param currentUser Spring Security가 인증한 현재 사용자 정보
      * @return 성공 시, 메시지 목록을 `data` 필드에 담은 ApiResponse 객체
      */
     @GetMapping("/chats")
     public ResponseEntity<ApiResponse<List<ChatResponse>>> getChannelChatHistoryForAi(
             @PathVariable("channelId") Long channelId,
-            @RequestHeader("X-User-ID") Long userId) {
+            @AuthenticationPrincipal CustomUserDetails currentUser) { // [수정] @RequestHeader 대신 @AuthenticationPrincipal 사용
 
+        Long userId = currentUser.getUser().getId(); // [수정] 인증된 사용자 정보에서 ID를 가져옴
         List<ChatResponse> messages = messageService.getMessagesForAiSummary(channelId, userId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(messages));

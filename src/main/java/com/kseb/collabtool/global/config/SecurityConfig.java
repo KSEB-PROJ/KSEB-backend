@@ -64,10 +64,7 @@ public class SecurityConfig {
                         // 그 외 모든 요청은 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
                 )
-                // 직접 만든 JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 전에 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-
-        // .logout(...) 부분 삭제
 
         return http.build();
     }
