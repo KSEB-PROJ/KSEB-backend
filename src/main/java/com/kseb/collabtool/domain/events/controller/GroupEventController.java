@@ -80,7 +80,9 @@ public class GroupEventController {
     }
     /*
     <챗봇용> 해당 기간에 대해 그룹에 속한 모든 인원의 스케줄 추출
-    startDate(from)은 현재시간을 default로 처리
+    from 과 to를 입력 받아서 (시작 날짜부터 종료 날짜) 해당 날짜에 해당하는 event만 조회
+    startDate(from)은 현재시간 기준으로 처리하면 될듯
+
      */
     @GetMapping("/all-schedules")
     public ResponseEntity<GroupScheduleBundle> getAllSchedulesForGroupMembers(

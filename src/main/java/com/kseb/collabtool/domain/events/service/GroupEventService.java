@@ -166,6 +166,10 @@ public class GroupEventService {
         // 해당 그룹에 해당하는 그룹원 userId 리스트를 뽑아줌.
         List<Long> memberUserIds = groupMemberRepository.findUserIdsByGroupId(groupId);
 
+        /*
+        from 과 to를 입력 받아서 (시작 날짜부터 종료 날짜) 해당 날짜에 해당하는 event만 조회
+         */
+
         //모든 그룹원들 개인 일정 뽑아줌
         List<EventTimeInfoResponse> personalEvents = eventRepository.findAllPersonalEventsForUsers(
                 OwnerType.USER, memberUserIds, from, to
