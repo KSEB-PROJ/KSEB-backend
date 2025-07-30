@@ -26,4 +26,7 @@ public interface CourseTimetableRepository extends JpaRepository<CourseTimetable
     List<CourseTimetable> findAllByUserIdAndSemester(Long userId, String semester);
     List<CourseTimetable> findAllByUserId(Long userId);
     Optional<CourseTimetable> findByIdAndUserId(Long id, Long userId);
+
+    //user_id가 list에 포함되는 모든 CourseTimetable을 찾아라
+    List<CourseTimetable> findByUser_IdIn(List<Long> userIds);
 }

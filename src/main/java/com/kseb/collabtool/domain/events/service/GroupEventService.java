@@ -1,13 +1,13 @@
 package com.kseb.collabtool.domain.events.service;
 
-import com.kseb.collabtool.domain.events.dto.EventCreateResult;
-import com.kseb.collabtool.domain.events.dto.EventResponse;
-import com.kseb.collabtool.domain.events.dto.EventUpdateRequest;
-import com.kseb.collabtool.domain.events.dto.GroupEventCreateRequest;
+import com.kseb.collabtool.domain.events.dto.*;
 import com.kseb.collabtool.domain.events.entity.*;
 import com.kseb.collabtool.domain.events.repository.EventParticipantRepository;
 import com.kseb.collabtool.domain.events.repository.EventRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
+import com.kseb.collabtool.domain.groups.repository.GroupRepository;
+import com.kseb.collabtool.domain.timetable.dto.LectureTimeInfo;
+import com.kseb.collabtool.domain.timetable.repository.CourseTimetableRepository;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import com.kseb.collabtool.global.exception.GeneralException;
@@ -28,7 +28,7 @@ public class GroupEventService {
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository userRepository;
     private final EventParticipantRepository eventParticipantRepository;
-
+    private final CourseTimetableRepository courseTimetableRepository;
 
     @Transactional
     public EventCreateResult createGroupEvent(Long groupId, GroupEventCreateRequest dto, Long creatorId) {
@@ -153,5 +153,35 @@ public class GroupEventService {
                 .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
         event.setUpdatedBy(updater);
         event.setUpdatedAt(LocalDateTime.now());
+    }
+
+
+    @Transactional
+    public GroupScheduleBundle getGroupMemberSchedules(Long groupId, LocalDateTime from, LocalDateTime to, Long currentUserId) {
+        // 권한 체크해주고
+        if (!groupMemberRepository.existsByGroupIdAndUserId(groupId, currentUserId)) {
+            throw new GeneralException(Status.NO_AUTHORITY);
+        }
+
+        // 해당 그룹에 해당하는 그룹원 userId 리스트를 뽑아줌.
+        List<Long> memberUserIds = groupMemberRepository.findUserIdsByGroupId(groupId);
+
+        //모든 그룹원들 개인 일정 뽑아줌
+        List<EventTimeInfoResponse> personalEvents = eventRepository.findAllPersonalEventsForUsers(
+                OwnerType.USER, memberUserIds, from, to
+        ).stream().map(EventTimeInfoResponse::from).toList();
+
+        //그룹 일정
+        List<EventTimeInfoResponse> groupEvents = eventRepository.findAllGroupEvents(
+                OwnerType.GROUP, groupId, from, to
+        ).stream().map(EventTimeInfoResponse::from).toList();
+
+        // 모든 그룹원들 강의 시간표
+        List<LectureTimeInfo> lectures = courseTimetableRepository.findByUser_IdIn(memberUserIds)
+                .stream()
+                .map(LectureTimeInfo::from)
+                .toList();
+
+        return new GroupScheduleBundle(personalEvents, groupEvents, lectures);
     }
 }

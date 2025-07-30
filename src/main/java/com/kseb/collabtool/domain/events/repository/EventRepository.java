@@ -70,6 +70,20 @@ public interface EventRepository extends JpaRepository<Event,Long> {
                                @Param("semester") String semester,
                                @Param("dayOfWeek") DayOfWeek dayOfWeek);
 
+
+    //모든 그룹원에 대해 해당 기간 내에 있는 모든 개인일정 추출
+    @Query("SELECT e FROM Event e WHERE e.ownerType = :ownerType AND e.ownerId IN :userIds AND e.startDatetime >= :from AND e.endDatetime <= :to")
+    List<Event> findAllPersonalEventsForUsers(@Param("ownerType") OwnerType ownerType,
+                                              @Param("userIds") List<Long> userIds,
+                                              @Param("from") LocalDateTime from,
+                                              @Param("to") LocalDateTime to);
+
+    //기간내에 모든 그룹 일정 추출
+    @Query("SELECT e FROM Event e WHERE e.ownerType = :ownerType AND e.ownerId = :groupId AND e.startDatetime >= :from AND e.endDatetime <= :to")
+    List<Event> findAllGroupEvents(@Param("ownerType") OwnerType ownerType,
+                                   @Param("groupId") Long groupId,
+                                   @Param("from") LocalDateTime from,
+                                   @Param("to") LocalDateTime to);
 }
 
 
