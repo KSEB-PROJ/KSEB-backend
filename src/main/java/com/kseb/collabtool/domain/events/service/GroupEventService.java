@@ -55,7 +55,11 @@ public class GroupEventService {
         groupEvent.setEndDatetime(dto.getEndDatetime());
         groupEvent.setAllDay(dto.isAllDay());
         groupEvent.setRrule(dto.getRrule());
-        groupEvent.setThemeColor(dto.getThemeColor());
+        if (dto.getThemeColor() == null || dto.getThemeColor().isEmpty()) {
+            groupEvent.setThemeColor("#3b82f6"); // 기본 색상
+        } else {
+            groupEvent.setThemeColor(dto.getThemeColor());
+        }
         groupEvent.setCreatedBy(creator);
         groupEvent.setUpdatedBy(creator);
         groupEvent.setCreatedAt(LocalDateTime.now());
@@ -64,17 +68,18 @@ public class GroupEventService {
         eventRepository.save(groupEvent);
 
         //참석자(그룹 멤버 전원) 등록
-        for (Long uid : userIds) {
+        List<EventParticipant> participants = userIds.stream().map(uid -> {
             User member = userRepository.findById(uid)
-                    .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
+                    .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND, "그룹 멤버를 찾을 수 없습니다: " + uid));
             EventParticipant participant = new EventParticipant();
             participant.setEvent(groupEvent);
             participant.setUser(member);
             participant.setStatus(ParticipantStatus.TENTATIVE);
             participant.setId(new EventParticipantId(groupEvent.getId(), member.getId()));
-            groupEvent.getParticipants().add(participant);
-        }
-        eventRepository.save(groupEvent);
+            return participant;
+        }).collect(Collectors.toList());
+
+        eventParticipantRepository.saveAll(participants);
 
         return new EventCreateResult(groupEvent.getId(), hasOverlap);
     }

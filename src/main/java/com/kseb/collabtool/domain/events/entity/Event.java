@@ -94,6 +94,6 @@ public class Event {
     // Event 엔티티 삭제(REMOVE) 시 관련 EventTask도 모두 같이 삭제
     //orphanRemoval = true 부모(Event)에서 자식(EventTask) 컬렉션에서 빠진(고아가 된) 객체 자동 삭제
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EventTask> eventTasks;
+    private List<EventTask> eventTasks = new ArrayList<>();
 
 }
