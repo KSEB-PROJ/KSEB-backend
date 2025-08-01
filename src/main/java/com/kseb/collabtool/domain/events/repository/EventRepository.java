@@ -45,6 +45,17 @@ public interface EventRepository extends JpaRepository<Event,Long> {
     """, nativeQuery = true)
     List<Event> findAllEventsForUser(@Param("userId") Long userId);
 
+    // 유저 전체 일정 기간별 조회 (개인 + 소속 그룹 일정)
+    @Query(value = """
+    SELECT * FROM events e
+    WHERE ((e.owner_type = 'USER' AND e.owner_id = :userId)
+       OR (e.owner_type = 'GROUP' AND e.owner_id IN (
+             SELECT gm.group_id FROM group_members gm WHERE gm.user_id = :userId
+         )))
+       AND (e.end_datetime > :startDate AND e.start_datetime < :endDate)
+    """, nativeQuery = true)
+    List<Event> findAllEventsForUserBetween(@Param("userId") Long userId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
     //그룹 삭제할 때 같이 날려버림
     @Modifying
     @Transactional

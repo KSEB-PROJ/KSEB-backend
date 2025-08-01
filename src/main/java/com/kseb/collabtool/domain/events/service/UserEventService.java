@@ -78,8 +78,13 @@ public class UserEventService {
     }
 
     @Transactional
-    public List<EventResponse> getAllEventsForUser(Long userId) {
-        List<Event> events = eventRepository.findAllEventsForUser(userId);
+    public List<EventResponse> getAllEventsForUser(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Event> events;
+        if (startDate != null && endDate != null) {
+            events = eventRepository.findAllEventsForUserBetween(userId, startDate, endDate);
+        } else {
+            events = eventRepository.findAllEventsForUser(userId);
+        }
         return events.stream()
                 .map(EventResponse::from)
                 .collect(Collectors.toList());

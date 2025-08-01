@@ -9,10 +9,12 @@ import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -47,13 +49,21 @@ public class UserEventController {
         return ResponseEntity.noContent().build();
     }
 
-    //조회
+    /**
+     * 현재 로그인한 사용자의 모든 일정(개인+그룹)을 조회합니다.
+     * @param currentUser 현재 인증된 사용자 정보
+     * @param startDate (선택) 조회 시작일 (ISO 8601 형식, 예: 2023-01-01T00:00:00)
+     * @param endDate (선택) 조회 종료일 (ISO 8601 형식, 예: 2023-01-31T23:59:59)
+     * @return 일정 목록
+     */
     @GetMapping
     public ResponseEntity<List<EventResponse>> getMyEvents(
-            @AuthenticationPrincipal CustomUserDetails currentUser
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ) {
         User user = currentUser.getUser();
-        List<EventResponse> events = userEventService.getAllEventsForUser(user.getId());
+        List<EventResponse> events = userEventService.getAllEventsForUser(user.getId(), startDate, endDate);
         return ResponseEntity.ok(events);
     }
 

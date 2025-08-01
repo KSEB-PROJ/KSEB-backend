@@ -11,6 +11,7 @@ import com.kseb.collabtool.domain.timetable.entity.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 @Builder
 @Entity
 @Table(name = "events")
@@ -82,6 +83,7 @@ public class Event {
     @Column(name = "theme_color", nullable = false, length = 30)
     private String themeColor;  // HEX 컬러코드 (#xxxxxx)
 
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<EventParticipant> participants = new ArrayList<>();
@@ -93,6 +95,7 @@ public class Event {
     }
     // Event 엔티티 삭제(REMOVE) 시 관련 EventTask도 모두 같이 삭제
     //orphanRemoval = true 부모(Event)에서 자식(EventTask) 컬렉션에서 빠진(고아가 된) 객체 자동 삭제
+    @Builder.Default
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventTask> eventTasks = new ArrayList<>();
 
