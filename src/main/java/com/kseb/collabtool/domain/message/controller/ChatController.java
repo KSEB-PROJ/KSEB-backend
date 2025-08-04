@@ -10,6 +10,7 @@ import com.kseb.collabtool.global.exception.ApiResponse;
 import com.kseb.collabtool.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,12 +25,13 @@ public class ChatController {
 
     private final MessageService messageService;
     private final ObjectMapper objectMapper; // (자동 주입, bean 등록됨)
+    private final SimpMessagingTemplate messagingTemplate; // WebSocket 메시지 전송용
 
     // --- 기존 API들 (경로 수정) ---
 
     // 메시지 + 파일 전송
     @PostMapping(value = "/messages", consumes = "multipart/form-data")
-    public ResponseEntity<List<ChatResponse>> sendMessage(
+    public ResponseEntity<Void> sendMessage( // [수정] 반환 타입을 Void로 변경
             //파일 다중 업로드를 위해 CHAT 부분 전부 수정합니당
             // 반환 타입을 List<ChatResponse>로
             @PathVariable Long channelId,
@@ -43,7 +45,13 @@ public class ChatController {
         request.setChannelId(channelId);
         // files 리스트를 서비스로 전달하고, 여러 개의 응답을 받을 수 있도록 수정
         List<ChatResponse> responses = messageService.sendMessage(userId, request, files);
-        return ResponseEntity.ok(responses);
+
+        // [추가] 저장된 각 메시지를 WebSocket 토픽으로 브로드캐스팅
+        responses.forEach(response -> {
+            messagingTemplate.convertAndSend("/topic/channels/" + channelId, response);
+        });
+
+        return ResponseEntity.ok().build(); // [수정] 성공 시 200 OK만 반환
     }
 
     // 나머지 API 동일 (body로 받아도 됨)

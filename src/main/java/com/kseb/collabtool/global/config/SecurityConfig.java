@@ -57,6 +57,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
+                                "/ws/**",
                                 "/ws-stomp/**",
                                 "/profile-images/**", //정적 프로필 이미지 접근 허용
                                 "/chat-files/**"      // 채팅 파일 경로 허용
