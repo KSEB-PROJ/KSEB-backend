@@ -21,6 +21,6 @@ public class ChatResponse {
     private String messageType;     // 메시지 타입 코드 (TEXT, IMAGE 등)
     private String fileUrl;         // 파일 URL
     private String fileName;        // 파일명
-    private Boolean isMine;         // 내가 보낸 메시지 여부
     private LocalDateTime createdAt;// 생성 시각
+    private boolean deleted;        // 삭제 여부 필드 추가
 }

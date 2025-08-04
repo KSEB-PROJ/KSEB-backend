@@ -10,7 +10,6 @@ import com.kseb.collabtool.global.exception.ApiResponse;
 import com.kseb.collabtool.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,42 +18,26 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-// [수정] 공통 경로를 /api/channels/{channelId}로 통합
 @RequestMapping("/api/channels/{channelId}")
 public class ChatController {
 
     private final MessageService messageService;
-    private final ObjectMapper objectMapper; // (자동 주입, bean 등록됨)
-    private final SimpMessagingTemplate messagingTemplate; // WebSocket 메시지 전송용
+    private final ObjectMapper objectMapper;
 
-    // --- 기존 API들 (경로 수정) ---
-
-    // 메시지 + 파일 전송
     @PostMapping(value = "/messages", consumes = "multipart/form-data")
-    public ResponseEntity<Void> sendMessage( // [수정] 반환 타입을 Void로 변경
-            //파일 다중 업로드를 위해 CHAT 부분 전부 수정합니당
-            // 반환 타입을 List<ChatResponse>로
+    public ResponseEntity<Void> sendMessage(
             @PathVariable Long channelId,
             @RequestPart("message") String messageJson,
-            // 단일 파일(file) 대신 여러 파일(files)을 리스트로 받음
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) throws Exception {
         Long userId = currentUser.getUser().getId();
         ChatRequest request = objectMapper.readValue(messageJson, ChatRequest.class);
         request.setChannelId(channelId);
-        // files 리스트를 서비스로 전달하고, 여러 개의 응답을 받을 수 있도록 수정
-        List<ChatResponse> responses = messageService.sendMessage(userId, request, files);
-
-        // [추가] 저장된 각 메시지를 WebSocket 토픽으로 브로드캐스팅
-        responses.forEach(response -> {
-            messagingTemplate.convertAndSend("/topic/channels/" + channelId, response);
-        });
-
-        return ResponseEntity.ok().build(); // [수정] 성공 시 200 OK만 반환
+        messageService.sendMessage(userId, request, files);
+        return ResponseEntity.ok().build();
     }
 
-    // 나머지 API 동일 (body로 받아도 됨)
     @GetMapping("/messages")
     public ResponseEntity<List<ChatResponse>> getMessages(
             @PathVariable Long channelId,
@@ -103,21 +86,12 @@ public class ChatController {
         return ResponseEntity.ok(response);
     }
 
-
-    /**
-     * AI 챗봇 서버가 대화 요약 기능을 위해 채널의 전체 대화 내역을 조회하는 전용 API.
-     * @param channelId 조회할 채널의 ID
-     * @param currentUser Spring Security가 인증한 현재 사용자 정보
-     * @return 성공 시, 메시지 목록을 `data` 필드에 담은 ApiResponse 객체
-     */
     @GetMapping("/chats")
     public ResponseEntity<ApiResponse<List<ChatResponse>>> getChannelChatHistoryForAi(
             @PathVariable("channelId") Long channelId,
-            @AuthenticationPrincipal CustomUserDetails currentUser) { // [수정] @RequestHeader 대신 @AuthenticationPrincipal 사용
-
-        Long userId = currentUser.getUser().getId(); // [수정] 인증된 사용자 정보에서 ID를 가져옴
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        Long userId = currentUser.getUser().getId();
         List<ChatResponse> messages = messageService.getMessagesForAiSummary(channelId, userId);
-
         return ResponseEntity.ok(ApiResponse.onSuccess(messages));
     }
 }
