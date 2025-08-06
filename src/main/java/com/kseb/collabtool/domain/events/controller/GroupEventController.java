@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -77,7 +78,23 @@ public class GroupEventController {
         groupEventService.updateGroupEvent(groupId, eventId, userId, dto);
         return ResponseEntity.noContent().build();
     }
+    /*
+    <챗봇용> 해당 기간에 대해 그룹에 속한 모든 인원의 스케줄 추출
+    from 과 to를 입력 받아서 (시작 날짜부터 종료 날짜) 해당 날짜에 해당하는 event만 조회
+    startDate(from)은 현재시간 기준으로 처리하면 될듯
 
-
-
+     */
+    @GetMapping("/all-schedules")
+    public ResponseEntity<GroupScheduleBundle> getAllSchedulesForGroupMembers(
+            @PathVariable Long groupId,
+            @RequestParam LocalDateTime from,
+            @RequestParam LocalDateTime to,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        Long userId = currentUser.getUser().getId();
+        GroupScheduleBundle response = groupEventService.getGroupMemberSchedules(
+                groupId, from, to, userId
+        );
+        return ResponseEntity.ok(response);
+    }
 }
