@@ -48,7 +48,7 @@ public class NoticeService {
     }
 
     public List<NoticeResponse> getNoticeList(Long groupId) {
-        return noticeRepository.findByGroup_IdOrderByPinnedUntilDescCreatedAtDesc(groupId)
+        return noticeRepository.findByGroupIdOrderByCreatedAtDesc(groupId)
                 .stream().map(NoticeResponse::fromEntity).collect(Collectors.toList());
     }
 

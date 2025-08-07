@@ -1,6 +1,7 @@
 package com.kseb.collabtool.domain.events.entity;
 
 import com.kseb.collabtool.domain.user.entity.User;
+import com.kseb.collabtool.domain.events.entity.OwnerType; // 누락된 import 추가
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

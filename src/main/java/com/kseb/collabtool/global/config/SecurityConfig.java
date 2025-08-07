@@ -63,8 +63,12 @@ public class SecurityConfig {
                                 "/profile-images/**", //정적 프로필 이미지 접근 허용
                                 "/chat-files/**"      // 채팅 파일 경로 허용
                         ).permitAll()
-                        // 그 외 모든 요청은 인증된 사용자만 접근 가능
-                        .anyRequest().authenticated()
+                        // /api/admin/** 경로는 ADMIN 역할만 접근 가능
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 그 외 /api/** 경로는 인증된 모든 사용자 접근 가능
+                        .requestMatchers("/api/**").authenticated()
+                        // 그 외 모든 요청은 일단 허용 (필요에 따라 조정)
+                        .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 

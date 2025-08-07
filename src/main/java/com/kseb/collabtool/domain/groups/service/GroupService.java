@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +98,10 @@ public class GroupService {
     }
 
     public List<GroupListDto> getGroupsByUser(Long userId) {
-        return groupMemberRepository.findGroupsByUserId(userId);
+        List<Group> groups = groupMemberRepository.findGroupsByUserId(userId);
+        return groups.stream()
+                .map(GroupListDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -105,7 +109,7 @@ public class GroupService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GeneralException(Status.GROUP_NOT_FOUND));
 
-        List<GroupMember> groupMembers = groupMemberRepository.findByGroup_Id(groupId);
+        List<GroupMember> groupMembers = groupMemberRepository.findByGroupId(groupId);
 
         List<GroupDetailDto.MemberInfo> members = groupMembers.stream()
                 .map(gm -> new GroupDetailDto.MemberInfo(

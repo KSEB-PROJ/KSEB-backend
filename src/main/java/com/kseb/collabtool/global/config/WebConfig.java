@@ -2,11 +2,18 @@ package com.kseb.collabtool.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    private final StringToRoleConverter stringToRoleConverter;
+
+    public WebConfig(StringToRoleConverter stringToRoleConverter) {
+        this.stringToRoleConverter = stringToRoleConverter;
+    }
 
     @Value("${file.chat-file-url-prefix}")
     private String chatFileUrlPrefix;
@@ -19,6 +26,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Value("${file.profile-image-folder}")
     private String profileImageFolder;
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(stringToRoleConverter);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
