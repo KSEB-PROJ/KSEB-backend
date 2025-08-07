@@ -47,6 +47,7 @@ public class JwtTokenProvider {
         // JWT Payload에 포함될 정보 (claims)
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername()); // sub: 사용자 이름
         claims.put("userId", userDetails.getUser().getId()); // userId: 사용자 고유 ID (Long 타입)
+        claims.put("role", userDetails.getAuthorities().stream().findFirst().orElseThrow(() -> new RuntimeException("User has no roles")).getAuthority()); // role: 사용자 권한
 
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
