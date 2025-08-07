@@ -28,7 +28,7 @@ public class ActivityLog {
     private User actor;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private ActionType actionType;
 
     @Column

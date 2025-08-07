@@ -5,15 +5,20 @@ import com.kseb.collabtool.domain.admin.dto.GroupAdminResponse;
 import com.kseb.collabtool.domain.admin.dto.LogResponse;
 import com.kseb.collabtool.domain.admin.dto.UserAdminResponse;
 import com.kseb.collabtool.domain.admin.service.AdminService;
+import com.kseb.collabtool.domain.log.entity.ActionType;
 import com.kseb.collabtool.domain.user.entity.Role;
 import com.kseb.collabtool.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -57,7 +62,12 @@ public class AdminController {
     }
 
     @GetMapping("/logs")
-    public ResponseEntity<Page<LogResponse>> getLogs(Pageable pageable) {
-        return ResponseEntity.ok(adminService.getLogs(pageable));
+    public ResponseEntity<Page<LogResponse>> getLogs(
+            Pageable pageable,
+            @RequestParam(required = false) String actorName,
+            @RequestParam(required = false) List<ActionType> actionTypes,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(adminService.getLogs(pageable, actorName, actionTypes, startDate, endDate));
     }
 }

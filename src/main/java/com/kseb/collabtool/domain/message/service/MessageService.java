@@ -1,6 +1,8 @@
 package com.kseb.collabtool.domain.message.service;
 
 import com.kseb.collabtool.domain.channel.entity.Channel;
+import com.kseb.collabtool.domain.log.entity.ActionType;
+import com.kseb.collabtool.domain.log.service.ActivityLogService;
 import com.kseb.collabtool.domain.message.dto.ChatRequest;
 import com.kseb.collabtool.domain.message.dto.ChatResponse;
 import com.kseb.collabtool.domain.channel.repository.ChannelRepository;
@@ -46,6 +48,7 @@ public class MessageService {
     private final GroupMemberRepository groupMemberRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final NoticeRepository noticeRepository;
+    private final ActivityLogService activityLogService;
 
     @Transactional
     public void sendMessage(Long userId, ChatRequest request, List<MultipartFile> files) {
@@ -65,7 +68,9 @@ public class MessageService {
             textMessage.setUser(user);
             textMessage.setContent(request.getContent());
             textMessage.setMessageType(textType);
-            responses.add(toResponse(messageRepository.save(textMessage), userId));
+            Message savedMessage = messageRepository.save(textMessage);
+            responses.add(toResponse(savedMessage, userId));
+            activityLogService.saveLog(user, ActionType.MESSAGE_SEND, savedMessage.getId(), "Sent: '" + truncate(savedMessage.getContent()) + "'");
         }
 
         // 2. 파일 메시지 처리
@@ -96,7 +101,9 @@ public class MessageService {
 
                     fileMessage.setFileUrl(fileUrl);
                     fileMessage.setFileName(originalName);
-                    responses.add(toResponse(messageRepository.save(fileMessage), userId));
+                    Message savedMessage = messageRepository.save(fileMessage);
+                    responses.add(toResponse(savedMessage, userId));
+                    activityLogService.saveLog(user, ActionType.MESSAGE_SEND, savedMessage.getId(), "File: " + originalName);
 
                 } catch (IOException e) {
                     throw new GeneralException(Status.INTERNAL_SERVER_ERROR, "파일 저장 실패: " + e.getMessage());
@@ -114,6 +121,8 @@ public class MessageService {
     public ChatResponse updateMessage(Long userId, Long messageId, ChatRequest request) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
         if (!message.getUser().getId().equals(userId)) {
             throw new GeneralException(Status.FORBIDDEN);
         }
@@ -121,12 +130,17 @@ public class MessageService {
             throw new GeneralException(Status.BAD_REQUEST, "파일 메시지는 내용을 수정할 수 없습니다.");
         }
 
+        String originalContent = message.getContent(); // 수정 전 내용 저장
+
         message.setContent(request.getContent());
         Message updatedMessage = messageRepository.save(message);
         ChatResponse response = toResponse(updatedMessage, userId);
         
         messagingTemplate.convertAndSend("/topic/channels/" + message.getChannel().getId(),
                 Map.of("type", "MESSAGE_UPDATE", "payload", response));
+        
+        String logDetails = "From: '" + truncate(originalContent) + "' To: '" + truncate(updatedMessage.getContent()) + "'";
+        activityLogService.saveLog(user, ActionType.MESSAGE_UPDATE, messageId, logDetails);
 
         return response;
     }
@@ -135,9 +149,13 @@ public class MessageService {
     public void deleteMessage(Long userId, Long messageId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new GeneralException(Status.NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(Status.USER_NOT_FOUND));
         if (!message.getUser().getId().equals(userId)) {
             throw new GeneralException(Status.FORBIDDEN);
         }
+
+        String originalContent = message.getContent(); // 삭제 전 내용 저장
 
         message.setDeleted(true);
         message.setContent("삭제된 메시지입니다.");
@@ -146,6 +164,8 @@ public class MessageService {
         Long channelId = message.getChannel().getId();
         messagingTemplate.convertAndSend("/topic/channels/" + channelId,
                 Map.of("type", "MESSAGE_DELETE", "payload", Map.of("id", message.getId())));
+        
+        activityLogService.saveLog(user, ActionType.MESSAGE_DELETE, messageId, "Deleted: '" + truncate(originalContent) + "'");
     }
 
 
@@ -155,6 +175,15 @@ public class MessageService {
         if (contentType.startsWith("image/")) return "IMAGE";
         if (contentType.startsWith("video/")) return "VIDEO";
         return "DOCUMENT";
+    }
+
+    // Helper method to truncate string
+    private String truncate(String value) {
+        int maxLength = 50;
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength) + "...";
     }
 
     @Transactional(readOnly = true)

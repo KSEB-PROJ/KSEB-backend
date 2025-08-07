@@ -26,6 +26,7 @@ public enum ActionType {
 
     // Message related actions
     MESSAGE_SEND("메시지 전송"),
+    MESSAGE_UPDATE("메시지 수정"),
     MESSAGE_DELETE("메시지 삭제"),
 
     // Notice related actions

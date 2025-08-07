@@ -4,22 +4,24 @@ import com.kseb.collabtool.domain.admin.dto.DashboardResponse;
 import com.kseb.collabtool.domain.admin.dto.GroupAdminResponse;
 import com.kseb.collabtool.domain.admin.dto.LogResponse;
 import com.kseb.collabtool.domain.admin.dto.UserAdminResponse;
-import com.kseb.collabtool.domain.groups.entity.Group;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.log.entity.ActionType;
 import com.kseb.collabtool.domain.log.entity.ActivityLog;
 import com.kseb.collabtool.domain.log.repository.ActivityLogRepository;
+import com.kseb.collabtool.domain.log.repository.ActivityLogSpecification;
+import com.kseb.collabtool.domain.log.service.ActivityLogService;
 import com.kseb.collabtool.domain.user.entity.Role;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class AdminService {
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
     private final ActivityLogRepository activityLogRepository;
+    private final ActivityLogService activityLogService;
 
     public DashboardResponse getDashboard() {
         long totalUsers = userRepository.count();
@@ -53,25 +56,13 @@ public class AdminService {
         userToUpdate.setRole(newRole);
         userRepository.save(userToUpdate);
 
-        // Log activity
-        activityLogRepository.save(ActivityLog.builder()
-                .actor(adminUser)
-                .actionType(ActionType.ADMIN_CHANGE_USER_ROLE)
-                .targetId(userId)
-                .details("Role changed to " + newRole)
-                .build());
+        activityLogService.saveLog(adminUser, ActionType.ADMIN_CHANGE_USER_ROLE, userId, "Role changed to " + newRole);
     }
 
     @Transactional
     public void deleteUser(Long userId, User adminUser) {
         userRepository.deleteById(userId);
-
-        // Log activity
-        activityLogRepository.save(ActivityLog.builder()
-                .actor(adminUser)
-                .actionType(ActionType.ADMIN_DELETE_USER)
-                .targetId(userId)
-                .build());
+        activityLogService.saveLog(adminUser, ActionType.ADMIN_DELETE_USER, userId);
     }
 
     public Page<GroupAdminResponse> getGroups(Pageable pageable) {
@@ -81,16 +72,11 @@ public class AdminService {
     @Transactional
     public void deleteGroup(Long groupId, User adminUser) {
         groupRepository.deleteById(groupId);
-
-        // Log activity
-        activityLogRepository.save(ActivityLog.builder()
-                .actor(adminUser)
-                .actionType(ActionType.ADMIN_DELETE_GROUP)
-                .targetId(groupId)
-                .build());
+        activityLogService.saveLog(adminUser, ActionType.ADMIN_DELETE_GROUP, groupId);
     }
 
-    public Page<LogResponse> getLogs(Pageable pageable) {
-        return activityLogRepository.findAll(pageable).map(LogResponse::from);
+    public Page<LogResponse> getLogs(Pageable pageable, String actorName, List<ActionType> actionTypes, LocalDate startDate, LocalDate endDate) {
+        Specification<ActivityLog> spec = ActivityLogSpecification.withFilter(actorName, actionTypes, startDate, endDate);
+        return activityLogRepository.findAll(spec, pageable).map(LogResponse::from);
     }
 }
