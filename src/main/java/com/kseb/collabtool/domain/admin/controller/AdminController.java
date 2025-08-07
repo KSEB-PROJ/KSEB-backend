@@ -1,9 +1,6 @@
 package com.kseb.collabtool.domain.admin.controller;
 
-import com.kseb.collabtool.domain.admin.dto.DashboardResponse;
-import com.kseb.collabtool.domain.admin.dto.GroupAdminResponse;
-import com.kseb.collabtool.domain.admin.dto.LogResponse;
-import com.kseb.collabtool.domain.admin.dto.UserAdminResponse;
+import com.kseb.collabtool.domain.admin.dto.*;
 import com.kseb.collabtool.domain.admin.service.AdminService;
 import com.kseb.collabtool.domain.log.entity.ActionType;
 import com.kseb.collabtool.domain.user.entity.Role;
@@ -69,5 +66,20 @@ public class AdminController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(adminService.getLogs(pageable, actorName, actionTypes, startDate, endDate));
+    }
+
+    @GetMapping("/stats/daily-registrations")
+    public ResponseEntity<List<DailyRegistrationDTO>> getDailyRegistrations(@RequestParam(defaultValue = "7") int days) {
+        return ResponseEntity.ok(adminService.getDailyRegistrations(days));
+    }
+
+    @GetMapping("/stats/hourly-activity")
+    public ResponseEntity<List<HourlyActivityDTO>> getHourlyActivity(@RequestParam(defaultValue = "24") int hours) {
+        return ResponseEntity.ok(adminService.getHourlyActivity(hours));
+    }
+
+    @GetMapping("/stats/content-distribution")
+    public ResponseEntity<ContentTypeDistributionDTO> getContentTypeDistribution() {
+        return ResponseEntity.ok(adminService.getContentTypeDistribution());
     }
 }

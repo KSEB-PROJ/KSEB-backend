@@ -6,15 +6,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class NoticeCleanupScheduler {
+
     private final NoticeRepository noticeRepository;
 
-    // 매 시간마다 실행 (cron: 초 분 시 일 월 요일)
-    @Scheduled(cron = "0 0 * * * *") // 매 정각마다
+    // 매일 자정에 실행
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
-    public void deleteExpiredNotices() {
-        noticeRepository.deleteExpiredNotices();
+    public void cleanupExpiredNotices() {
+        noticeRepository.deleteExpiredNotices(LocalDateTime.now());
     }
 }

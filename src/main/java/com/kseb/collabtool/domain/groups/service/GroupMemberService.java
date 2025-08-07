@@ -37,7 +37,7 @@ public class GroupMemberService {
             throw new GeneralException(Status.GROUP_NOT_FOUND);
         }
 
-        List<GroupMember> members = groupMemberRepository.findByGroup_Id(groupId);
+        List<GroupMember> members = groupMemberRepository.findByGroupId(groupId);
         return members.stream()
                 .map(GroupMemberResponse::fromEntity)
                 .collect(Collectors.toList());
