@@ -16,6 +16,8 @@ import com.kseb.collabtool.domain.groups.entity.MemberRole;
 import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.groups.repository.MemberRoleRepository;
+import com.kseb.collabtool.domain.log.entity.ActionType;
+import com.kseb.collabtool.domain.log.service.ActivityLogService;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
 import com.kseb.collabtool.global.exception.GeneralException;
@@ -41,6 +43,7 @@ public class GroupService {
     // 자동 채널 생성을 위한 Repository
     private final ChannelRepository channelRepository;
     private final ChannelTypeRepository channelTypeRepository;
+    private final ActivityLogService activityLogService; // [추가]
 
 
     @Transactional
@@ -65,6 +68,9 @@ public class GroupService {
 
         // 기본 채널(공지사항, 일정) 자동 생성
         createDefaultChannels(group);
+
+        // 그룹 생성 로그를 기록합니다.
+        activityLogService.saveLog(owner, ActionType.GROUP_CREATE, group.getId());
 
         return GroupResponse.fromEntity(group);
     }

@@ -10,12 +10,15 @@ public class GroupListDto {
     private Long id;
     private String name;
     private String themeColor;
+    private String code;
+
 
     public static GroupListDto fromEntity(Group group) {
         return new GroupListDto(
                 group.getId(),
                 group.getName(),
-                group.getThemeColor()
+                group.getThemeColor(),
+                group.getCode()
         );
     }
 }

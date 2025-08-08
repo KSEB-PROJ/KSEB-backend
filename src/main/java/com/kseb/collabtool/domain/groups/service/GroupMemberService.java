@@ -1,3 +1,5 @@
+// kseb-proj/kseb-backend/KSEB-backend-feature-log/src/main/java/com/kseb/collabtool/domain/groups/service/GroupMemberService.java
+
 package com.kseb.collabtool.domain.groups.service;
 
 import com.kseb.collabtool.domain.groups.dto.GroupMemberResponse;
@@ -8,6 +10,8 @@ import com.kseb.collabtool.domain.groups.entity.MemberRole;
 import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.groups.repository.MemberRoleRepository;
+import com.kseb.collabtool.domain.log.entity.ActionType; // [추가]
+import com.kseb.collabtool.domain.log.service.ActivityLogService; // [추가]
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.global.exception.GeneralException;
 import com.kseb.collabtool.global.exception.Status;
@@ -25,10 +29,9 @@ import java.util.stream.Collectors;
 public class GroupMemberService {
 
     private final GroupMemberRepository groupMemberRepository;
-
     private final GroupRepository groupRepository;
-
     private final MemberRoleRepository memberRoleRepository;
+    private final ActivityLogService activityLogService; // [추가]
 
     public List<GroupMemberResponse> getMembersByGroupId(Long groupId) {
         // 그룹(방) 존재 여부 체크
@@ -64,29 +67,9 @@ public class GroupMemberService {
         member.setJoinedAt(LocalDateTime.now());
         groupMemberRepository.save(member);
 
+        // [추가] 그룹 참가 로그를 기록합니다.
+        activityLogService.saveLog(user, ActionType.GROUP_JOIN_USER, group.getId(), "Joined with code: " + inviteCode);
+
         return GroupResponse.fromEntity(group);
     }
-
-
-    /*
-    @Transactional
-    public void changeRole(Long groupId, Long memberId, User user) {
-        //LEADER인지 검증
-        GroupMember operatorMember = groupMemberRepository.findByGroupIdAndUserId(groupId, user.getId())
-                .orElseThrow(() -> new IllegalStateException("그룹의 멤버가 아님"));
-        if (!"LEADER".equals(operatorMember.getRole().getCode())) {
-            throw new AccessDeniedException("권한이 없습니다.");
-        }
-
-        //대상 멤버 조회하고 역할 변경ㅎ,기
-        GroupMember targetMember = groupMemberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
-        MemberRole newRole = memberRoleRepository.findByCode(roleCode)
-                .orElseThrow(() -> new IllegalArgumentException("역할 코드가 잘못되었습니다."));
-
-        targetMember.setRole(newRole);
-    }
-    */
-
-    //리
 }
