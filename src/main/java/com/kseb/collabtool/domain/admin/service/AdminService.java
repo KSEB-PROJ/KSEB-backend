@@ -1,10 +1,12 @@
 package com.kseb.collabtool.domain.admin.service;
 
 import com.kseb.collabtool.domain.admin.dto.*;
+import com.kseb.collabtool.domain.channel.entity.Channel;
 import com.kseb.collabtool.domain.channel.repository.ChannelRepository;
 import com.kseb.collabtool.domain.events.repository.EventRepository;
 import com.kseb.collabtool.domain.events.repository.EventTaskRepository;
 import com.kseb.collabtool.domain.groups.entity.Group;
+import com.kseb.collabtool.domain.groups.entity.GroupMember;
 import com.kseb.collabtool.domain.groups.repository.GroupMemberRepository;
 import com.kseb.collabtool.domain.groups.repository.GroupRepository;
 import com.kseb.collabtool.domain.log.entity.ActionType;
@@ -13,7 +15,10 @@ import com.kseb.collabtool.domain.log.repository.ActivityLogRepository;
 import com.kseb.collabtool.domain.log.repository.ActivityLogSpecification;
 import com.kseb.collabtool.domain.log.service.ActivityLogService;
 import com.kseb.collabtool.domain.message.repository.MessageRepository;
+import com.kseb.collabtool.domain.notice.entity.Notice;
 import com.kseb.collabtool.domain.notice.repository.NoticeRepository;
+import com.kseb.collabtool.domain.groups.entity.GroupMember;
+import com.kseb.collabtool.domain.notice.entity.Notice;
 import com.kseb.collabtool.domain.user.entity.Role;
 import com.kseb.collabtool.domain.user.entity.User;
 import com.kseb.collabtool.domain.user.repository.UserRepository;
@@ -92,10 +97,10 @@ public class AdminService {
         // 5. Group: 사용자가 생성한 그룹을 '개별적으로' 삭제하여 CascadeType.ALL 트리거
         List<Group> ownedGroups = groupRepository.findByOwnerId(userId);
         groupRepository.deleteAll(ownedGroups); // deleteAll은 개별 delete를 호출하여 cascade를 보장
-        
+
         // --- 모든 연결이 끊어진 후, 사용자 삭제 ---
         userRepository.deleteById(userId);
-        
+
         // --- 최종 로그 기록 ---
         activityLogService.saveLog(adminUser, ActionType.ADMIN_DELETE_USER, userId);
     }
@@ -111,10 +116,65 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
+    public GroupDetailAdminResponse getGroupDetailsForAdmin(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+
+        List<Channel> channels = channelRepository.findByGroupId(groupId);
+        List<Notice> notices = noticeRepository.findByGroupIdOrderByCreatedAtDesc(groupId);
+        List<GroupMember> members = groupMemberRepository.findByGroupId(groupId);
+
+        return GroupDetailAdminResponse.from(group, channels, notices, members);
+    }
+
+    @Transactional(readOnly = true)
     public Page<LogResponse> getLogs(Pageable pageable, String actorName, List<ActionType> actionTypes, LocalDate startDate, LocalDate endDate) {
         Specification<ActivityLog> spec = ActivityLogSpecification.withFilter(actorName, actionTypes, startDate, endDate);
-        return activityLogRepository.findAll(spec, pageable).map(LogResponse::from);
+        return activityLogRepository.findAll(spec, pageable).map(this::buildLogResponse);
     }
+
+    private LogResponse buildLogResponse(ActivityLog log) {
+        LogResponse.LogResponseBuilder builder = LogResponse.builder()
+                .id(log.getId())
+                .actorName(log.getActor() != null ? log.getActor().getName() : "System")
+                .actionType(log.getActionType())
+                .actionDescription(log.getActionType().getDescription())
+                .targetId(log.getTargetId())
+                .details(log.getDetails())
+                .createdAt(log.getCreatedAt());
+
+        ActionType type = log.getActionType();
+        Long targetId = log.getTargetId();
+
+        if (targetId != null) {
+            if (type == ActionType.MESSAGE_SEND || type == ActionType.MESSAGE_UPDATE || type == ActionType.MESSAGE_DELETE) {
+                messageRepository.findById(targetId).ifPresent(message -> {
+                    Channel channel = message.getChannel();
+                    builder.channelName(channel.getName());
+                    builder.groupName(channel.getGroup().getName());
+                    builder.targetContent(message.getContent());
+                });
+            } else if (type == ActionType.NOTICE_CREATE || type == ActionType.NOTICE_UPDATE || type == ActionType.NOTICE_DELETE) {
+                noticeRepository.findById(targetId).ifPresent(notice -> {
+                    builder.channelName(notice.getChannel().getName());
+                    builder.groupName(notice.getGroup().getName());
+                    builder.targetContent(notice.getContent());
+                });
+            } else if (type == ActionType.CHANNEL_CREATE || type == ActionType.CHANNEL_DELETE) {
+                channelRepository.findById(targetId).ifPresent(channel -> {
+                    builder.channelName(channel.getName());
+                    builder.groupName(channel.getGroup().getName());
+                });
+            } else if (type == ActionType.GROUP_CREATE || type == ActionType.GROUP_DELETE || type == ActionType.ADMIN_DELETE_GROUP) {
+                groupRepository.findById(targetId).ifPresent(group -> {
+                    builder.groupName(group.getName());
+                });
+            }
+        }
+
+        return builder.build();
+    }
+
 
     @Transactional(readOnly = true)
     public List<DailyRegistrationDTO> getDailyRegistrations(int days) {

@@ -52,6 +52,11 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getGroups(pageable));
     }
 
+    @GetMapping("/groups/{groupId}")
+    public ResponseEntity<GroupDetailAdminResponse> getGroupDetails(@PathVariable Long groupId) {
+        return ResponseEntity.ok(adminService.getGroupDetailsForAdmin(groupId));
+    }
+
     @DeleteMapping("/groups/{groupId}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long groupId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         adminService.deleteGroup(groupId, userDetails.getUser());
