@@ -41,28 +41,27 @@
 ---
 
 ## 🌳 Folder Structure
-'''
-java
+```text
+src/main/java
 └── com
-└── kseb
-└── collabtool
-├── domain          # 핵심 비즈니스 로직 (도메인별 패키지)
-│   ├── admin           # 관리자 페이지 관련 기능
-│   ├── channel         # 채널 관련 기능
-│   ├── events          # 일정(Event) 및 할일(Task) 관련 기능
-│   ├── filemeta        # 파일 메타데이터 관리
-│   ├── groups          # 그룹 및 멤버 관련 기능
-│   ├── log             # 사용자 활동 로그
-│   ├── message         # 채팅 메시지 관련 기능
-│   ├── notice          # 공지사항 관련 기능
-│   ├── timetable       # 대학 시간표 기능
-│   └── user            # 사용자 계정 및 인증 관련 기능
-├── global          # 전역 설정 및 공통 모듈
-│   ├── config          # Security, CORS, Web 등 설정 클래스
-│   ├── exception       # 전역 예외 처리
-│   └── security        # JWT, CustomUserDetails 등 보안 관련 클래스
-└── util            # 유틸리티 클래스
-'''
+    └── kseb
+        └── collabtool
+            ├── domain          # 핵심 비즈니스 로직 (도메인별 패키지)
+            │   ├── admin           # 관리자 페이지 관련 기능
+            │   ├── channel         # 채널 관련 기능
+            │   ├── events          # 일정(Event) 및 할일(Task) 관련 기능
+            │   ├── filemeta        # 파일 메타데이터 관리
+            │   ├── groups          # 그룹 및 멤버 관련 기능
+            │   ├── log             # 사용자 활동 로그
+            │   ├── message         # 채팅 메시지 관련 기능
+            │   ├── notice          # 공지사항 관련 기능
+            │   ├── timetable       # 대학 시간표 기능
+            │   └── user            # 사용자 계정 및 인증 관련 기능
+            ├── global          # 전역 설정 및 공통 모듈
+            │   ├── config          # Security, CORS, Web 등 설정 클래스
+            │   ├── exception       # 전역 예외 처리
+            │   └── security        # JWT, CustomUserDetails 등 보안 관련 클래스
+            └── util            # 유틸리티 클래스
 
 ---
 
