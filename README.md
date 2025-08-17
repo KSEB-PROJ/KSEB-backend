@@ -62,7 +62,7 @@ src/main/java
             │   ├── exception       # 전역 예외 처리
             │   └── security        # JWT, CustomUserDetails 등 보안 관련 클래스
             └── util            # 유틸리티 클래스
-
+```
 ---
 
 ## 🚀 Our Goals
